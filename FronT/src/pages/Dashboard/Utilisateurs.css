@@ -1,0 +1,117 @@
+/* Utilisateurs.css */
+
+.utilisateurs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.utilisateurs-header h2 {
+    margin: 0;
+}
+
+.utilisateurs-header button {
+    padding: 8px 23px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    width: 15%;
+    margin: 20px;
+}
+
+.utilisateurs-header button:hover {
+    background-color: #0056b3;
+}
+
+.table-utilisateurs {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+.table-utilisateurs th,
+.table-utilisateurs td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.modal-titre{
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+.modal-content input,
+.modal-content select {
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-buttons .btn-submit {
+    background-color: #28a745;
+    color: white;
+}
+
+.modal-buttons .btn-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    height: 38px;
+    width: 10%;
+}
+
+.pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-weight: bold;
+}
+/*.btn-pagination{*/
+/*    height: 38px;*/
+/*    width: 10%;*/
+/*    background-color: #007bff;*/
+/*}*/

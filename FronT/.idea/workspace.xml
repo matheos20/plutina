@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="15d4907b-03a4-466e-91a3-aaf1238f1a4a" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../" />
+  </component>
+  <component name="ProjectId" id="2ydZqUXROACpRrgqflR1OC5EfJw" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\kookp\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Matheos\laravelPlutina\FronT\src\components\Navbar" />
+      <recent name="D:\Matheos\laravelPlutina\FronT\src\pages\Produit" />
+      <recent name="D:\Matheos\laravelPlutina\FronT\src\pages\Home" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="15d4907b-03a4-466e-91a3-aaf1238f1a4a" name="Default Changelist" comment="" />
+      <created>1750166601869</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1750166601869</updated>
+      <workItem from="1750166602922" duration="1357000" />
+      <workItem from="1750228267645" duration="14601000" />
+      <workItem from="1750318437399" duration="11311000" />
+      <workItem from="1750406020898" duration="8897000" />
+      <workItem from="1750670587083" duration="33573000" />
+      <workItem from="1751007077408" duration="8985000" />
+      <workItem from="1751451977362" duration="15173000" />
+      <workItem from="1751619707431" duration="5024000" />
+      <workItem from="1753351024466" duration="36000" />
+      <workItem from="1753354853108" duration="594000" />
+      <workItem from="1753356735517" duration="6000" />
+      <workItem from="1753357062122" duration="688000" />
+      <workItem from="1753437319750" duration="959000" />
+      <workItem from="1754053587254" duration="2437000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="707" y="318" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1750763581597">
+      <screen x="0" y="0" width="1920" height="1032" />
+    </state>
+    <state x="707" y="318" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1032/1920.0.1920.1032@0.0.1920.1032" timestamp="1750763581597" />
+    <state x="740" y="271" key="FileChooserDialogImpl" timestamp="1753437592066">
+      <screen x="0" y="0" width="1920" height="1032" />
+    </state>
+    <state x="740" y="271" key="FileChooserDialogImpl/0.0.1920.1032/1920.0.1920.1032@0.0.1920.1032" timestamp="1753437592066" />
+    <state x="667" y="115" width="585" height="801" key="find.popup" timestamp="1750254998610">
+      <screen x="0" y="0" width="1920" height="1032" />
+    </state>
+    <state x="667" y="115" width="585" height="801" key="find.popup/0.0.1920.1032/1920.0.1920.1032@0.0.1920.1032" timestamp="1750254998610" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/services/api.js</url>
+          <line>1</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/pages/Login/Login.js</url>
+          <line>2</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

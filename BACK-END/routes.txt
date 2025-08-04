@@ -1,0 +1,22 @@
+
+   ReflectionException 
+
+  Class "App\Http\Controllers\Auth\LoginController" does not exist
+
+  at vendor\laravel\framework\src\Illuminate\Foundation\Console\RouteListCommand.php:225
+    221▕             if ($this->isFrameworkController($route)) {
+    222▕                 return false;
+    223▕             }
+    224▕ 
+  ➜ 225▕             $path = (new ReflectionClass($route->getControllerClass()))
+    226▕                                 ->getFileName();
+    227▕         } else {
+    228▕             return false;
+    229▕         }
+
+  1   vendor\laravel\framework\src\Illuminate\Foundation\Console\RouteListCommand.php:225
+      ReflectionClass::__construct("App\Http\Controllers\Auth\LoginController")
+
+  2   vendor\laravel\framework\src\Illuminate\Foundation\Console\RouteListCommand.php:147
+      Illuminate\Foundation\Console\RouteListCommand::isVendorRoute(Object(Illuminate\Routing\Route))
+

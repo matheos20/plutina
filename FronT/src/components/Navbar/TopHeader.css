@@ -1,0 +1,177 @@
+/* Top Header */
+.top-header {
+    background-color: #f5f5f5;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-family: Dancing Script;
+    /*margin: 0px 290px*/
+}
+
+.top-header .container-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.top-header .left span,
+.top-header .right a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-header .left {
+    flex: 1;
+    color: #333;
+}
+
+
+/* Left */
+.left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    flex: 1;
+}
+
+.left .icon {
+    font-size: 16px;
+}
+
+.email-text {
+    font-size: 14px;
+}
+
+/* Center */
+.center {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+}
+
+
+.top-header .center {
+    flex: 2;
+    justify-content: center;
+}
+
+.top-header .right {
+    flex: 1;
+    justify-content: flex-end;
+}
+
+/* Barre de recherche */
+.search-bar {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 400px;
+    outline: none;
+    font-size: 14px;
+}
+
+
+/* Right */
+.right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.dropdown {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+}
+
+
+/* Main Navbar */
+.main-navbar {
+    background-color: #ffffff;
+    padding: 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.container-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo a {
+    font-size: 26px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+}
+
+/* Menu */
+.menu {
+    display: flex;
+    gap: 20px;
+}
+
+.menu a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.menu a:hover {
+    color: #ff6f61;
+}
+
+/* Profile icon */
+.profile a {
+    color: #333;
+}
+
+/* Hamburger (mobile) */
+.menu-toggle {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .menu.active {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .profile {
+        display: none;
+    }
+}

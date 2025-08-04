@@ -1,0 +1,61 @@
+.commandes-container {
+    padding: 2rem;
+    background-color: #f4f6f8;
+}
+
+.commandes-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.commandes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.commande-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.commande-card:hover {
+    transform: scale(1.02);
+}
+
+.commande-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.etat {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+    font-weight: bold;
+    color: white;
+}
+
+.etat.en-cours { background-color: #f39c12; }
+.etat.livrée { background-color: #27ae60; }
+.etat.annulée { background-color: #e74c3c; }
+
+.produits-section {
+    margin-top: 10px;
+}
+
+.produits-section ul {
+    padding-left: 20px;
+    margin-top: 5px;
+}
+
+.prix {
+    color: #2c3e50;
+    font-weight: bold;
+}
