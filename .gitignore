@@ -1,0 +1,3 @@
+*.rar 
+FronT/node_modules/ 
+FronT/node_modules/.cache/ 
