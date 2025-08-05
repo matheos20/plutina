@@ -31,6 +31,7 @@ Route::apiResource('produits', ProduitController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/commandes', [CommandeController::class, 'index']);
     Route::get('/commandes/{id}', [CommandeController::class, 'show']);
+    Route::put('/commandes/{id}', [CommandeController::class, 'update']);
     Route::post('/commandes', [CommandeController::class, 'store']);
     Route::delete('/commandes/{id}', [CommandeController::class, 'destroy']);
 });

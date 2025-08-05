@@ -1,3 +1,8 @@
 *.rar 
 FronT/node_modules/ 
 FronT/node_modules/.cache/ 
+FronT/node_modules/.cache/
+
+# Ignorer les fichiers de JetBrains / WebStorm / PhpStorm
+FronT/.idea/
+FronT/.idea/

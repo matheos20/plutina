@@ -14,6 +14,7 @@ import Utilisateurs from "./pages/Dashboard/Utilisateurs"; // ou le bon chemin
 import FicheProduitAdmin from "./pages/Produit/FicheProduitAdmin";
 import ModifierProduit from './pages/Produit/ModifierProduit';
 import AjouterCommande from "./pages/Commande/AjouterCommande"; // adapte selon ton chemin
+import ModifierCommande from "./pages/Commande/ModifierCommande"; // adapte selon ton chemin
 
 
 
@@ -44,6 +45,9 @@ function App() {
 
                         <Route path="commandes" element={<Commande />} />
                         <Route path="commandes/ajouter" element={<AjouterCommande />} />
+                        {/*<Route path="commandes/modifier/:id" element={<ModifierCommande />} />*/}
+                        <Route path="commandes/:id/edit" element={<ModifierCommande />} />
+
 
                         <Route path="devis" element={<div>Gestion devis</div>} />
                         <Route path="factures" element={<div>Gestion factures</div>} />

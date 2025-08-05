@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Commande = () => {
     const [commandes, setCommandes] = useState([]);
+    const [loading, setLoading] = useState(true); // état de chargement
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -14,6 +15,9 @@ const Commande = () => {
             })
             .catch(err => {
                 console.error("Erreur lors du chargement des commandes :", err);
+            })
+            .finally(() => {
+                setLoading(false); // chargement terminé
             });
     }, []);
 
@@ -28,6 +32,14 @@ const Commande = () => {
         }
     };
 
+    if (loading) {
+        return <p className="loading-message">⏳ Chargement des commandes...</p>;
+    }
+
+    if (commandes.length === 0) {
+        return <p className="empty-message">📭 Aucune commande trouvée.</p>;
+    }
+
     return (
         <div className="commandes-container">
             <h2 className="commandes-title">📦 Liste des Commandes</h2>
@@ -41,20 +53,26 @@ const Commande = () => {
                         </div>
                         <p><strong>Client :</strong> {commande.client?.nom} {commande.client?.prenom}</p>
                         <p><strong>Période :</strong> {commande.debut_location} → {commande.fin_location}</p>
-                        <p><strong>Prix total :</strong> <span className="prix">{commande.prix_total} €</span></p>
+                        <p><strong>Prix total :</strong> <span className="prix">
+                            {
+                                commande.produits.reduce((total, prod) => {
+                                    return total + (prod.pivot.quantite * prod.pivot.prix_unitaire);
+                                }, 0).toFixed(2)
+                            } €
+                        </span></p>
+
 
                         <div className="produits-section">
                             <strong>Produits :</strong>
                             <ul>
                                 {commande.produits.map(prod => (
                                     <li key={prod.id}>
-                                        {prod.nom} – {prod.pivot.quantite} x {prod.pivot.prix_unitaire} €
+                                        {prod.designation} – {prod.pivot.quantite} x {prod.pivot.prix_unitaire} €
                                     </li>
                                 ))}
                             </ul>
                         </div>
 
-                        {/* Boutons d'action */}
                         <div className="commande-actions">
                             <button className="btn btn-view" onClick={() => alert("🟢 Voir détails pas encore implémenté")}>Voir détails</button>
                             <button className="btn btn-edit" onClick={() => navigate(`/dashboard/commandes/${commande.id}/edit`)}>Modifier</button>
