@@ -1,0 +1,237 @@
+.produits-section {
+    margin-top: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.produit-card {
+    background-color: #f0f4f8;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+
+.produit-card select,
+.produit-card input {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    font-size: 14px;
+}
+
+.produit-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.supp-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    float: right;
+}
+
+.ajouter-produit-btn {
+    display: block;
+    background-color: #3498db;
+    color: white;
+    padding: 8px 14px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.total-ligne {
+    text-align: right;
+    font-weight: bold;
+    color: #333;
+}
+
+.total-commande {
+    text-align: right;
+    font-size: 18px;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.enregistrer-btn {
+    display: block;
+    background-color: #2ecc71;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    margin-top: 20px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+.flex {
+    display: flex;
+    gap: 16px; /* espace entre les colonnes */
+}
+
+.flex-1 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+    font-size: 14px;
+    display: block;
+}
+
+input[type="datetime-local"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+input[type="datetime-local"]:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Conteneur principal */
+div > h3 {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 0.5rem; /* mb-2 */
+    color: #222;
+}
+
+/* Conteneur produit en grille 5 colonnes */
+.produit-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 4px; /* moins d'espace entre ligne et bouton */
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+    transition: box-shadow 0.3s ease;
+}
+
+
+.produit-grid:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Select et inputs */
+.produit-grid select,
+.produit-grid input[type="number"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.produit-grid select:focus,
+.produit-grid input[type="number"]:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0,123,255,0.5);
+}
+
+/* Input prix unitaire en lecture seule style différent */
+.produit-grid input[readonly] {
+    background-color: #f0f0f0;
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* Span mode prix et total */
+.produit-grid span {
+    font-size: 13px;
+    color: #444;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+    user-select: none;
+}
+
+/* Bouton supprimer */
+.produit-grid button {
+    justify-self: end; /* pousse à l'extrémité droite */
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px; /* plus petit padding */
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px; /* plus petit texte */
+    transition: background-color 0.2s ease;
+    width: auto;
+    min-width: 60px;
+    height: 28px; /* hauteur réduite */
+}
+
+
+.produit-grid button:hover {
+    background-color: #b02a37;
+}
+
+/* Bouton Ajouter un produit */
+.ajouter-produit-btn {
+    margin-top: 12px;
+    color: #007BFF;
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px 0;
+    transition: color 0.2s ease;
+}
+
+.ajouter-produit-btn:hover {
+    color: #0056b3;
+}
+

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-// import './AjouterCommande.css'; // si tu veux ajouter du style
 
 function AjouterCommande() {
     const [clients, setClients] = useState([]);
@@ -10,8 +9,7 @@ function AjouterCommande() {
     const [debut_location, setDebutLocation] = useState('');
     const [fin_location, setFinLocation] = useState('');
     const [errors, setErrors] = useState({});
-    const token = localStorage.getItem("token")
-    // Charger clients et produits
+
     useEffect(() => {
         fetchClients();
         fetchProduits();
@@ -19,8 +17,7 @@ function AjouterCommande() {
 
     const fetchClients = async () => {
         try {
-            const res = await api.get('/clients'); // adapte l'URL si besoin
-            console.log("Clients chargés :", res.data);
+            const res = await api.get('/clients');
             setClients(res.data);
         } catch (error) {
             console.error("Erreur chargement clients :", error);
@@ -30,7 +27,7 @@ function AjouterCommande() {
     const fetchProduits = async () => {
         try {
             const res = await api.get('/produits');
-            setProduits(res.data.data); // attention à ton format
+            setProduits(res.data.data); // adapter si nécessaire
         } catch (error) {
             console.error("Erreur chargement produits :", error);
         }
@@ -39,14 +36,54 @@ function AjouterCommande() {
     const handleProduitChange = (produitId, field, value) => {
         setSelectedProduits(prev => {
             const existing = prev.find(p => p.id === produitId);
+            const produitData = produits.find(p => p.id === produitId);
+            let updatedProduits;
+
             if (existing) {
-                return prev.map(p =>
+                const updated = prev.map(p =>
                     p.id === produitId ? { ...p, [field]: value } : p
                 );
+                updatedProduits = updated;
             } else {
-                return [...prev, { id: produitId, [field]: value, quantite: 1, prix_unitaire: 0 }];
+                const nouveauProduit = {
+                    id: produitId,
+                    quantite: field === 'quantite' ? parseInt(value) : 1,
+                    prix_unitaire: 0,
+                    type_prix: produitData?.type_prix || 'unitaire',
+                    prix: produitData?.prix || 0,
+                    quantite_par_lot: produitData?.quantite_par_lot || 1
+                };
+                updatedProduits = [...prev, nouveauProduit];
             }
+
+            // Recalculer les prix unitaires
+            return updatedProduits.map(p => {
+                if (p.id === produitId) {
+                    let prixUnitaire = 0;
+                    if (p.type_prix === 'proportionnel' && p.quantite_par_lot) {
+                        prixUnitaire = p.prix / p.quantite_par_lot;
+                    } else {
+                        prixUnitaire = p.prix;
+                    }
+                    return {
+                        ...p,
+                        quantite: field === 'quantite' ? parseInt(value) : p.quantite,
+                        prix_unitaire: prixUnitaire,
+                    };
+                }
+                return p;
+            });
         });
+    };
+
+    const calculTotalProduit = (quantite, prix_unitaire) => {
+        return quantite * prix_unitaire;
+    };
+
+    const calculTotalCommande = () => {
+        return selectedProduits.reduce((total, p) => {
+            return total + calculTotalProduit(p.quantite, p.prix_unitaire);
+        }, 0);
     };
 
     const handleSubmit = async (e) => {
@@ -66,7 +103,6 @@ function AjouterCommande() {
         try {
             await api.post('/commandes', payload);
             alert("Commande créée avec succès !");
-            // Reset
             setSelectedClient('');
             setSelectedProduits([]);
             setDebutLocation('');
@@ -87,7 +123,6 @@ function AjouterCommande() {
         <div className="container mt-4">
             <h2>Ajouter une commande</h2>
             <form onSubmit={handleSubmit}>
-
                 <div className="mb-3">
                     <label>Client</label>
                     <select
@@ -115,7 +150,6 @@ function AjouterCommande() {
                         onChange={(e) => setDebutLocation(e.target.value)}
                         required
                     />
-                    {errors.debut_location && <div className="text-danger">{errors.debut_location[0]}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -127,7 +161,6 @@ function AjouterCommande() {
                         onChange={(e) => setFinLocation(e.target.value)}
                         required
                     />
-                    {errors.fin_location && <div className="text-danger">{errors.fin_location[0]}</div>}
                 </div>
 
                 <h5 className="mt-4">Produits</h5>
@@ -137,39 +170,46 @@ function AjouterCommande() {
                         <th>Désignation</th>
                         <th>Quantité</th>
                         <th>Prix unitaire</th>
+                        <th>Total ligne</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {produits.map(produit => (
-                        <tr key={produit.id}>
-                            <td>{produit.designation}</td>
-                            <td>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    className="form-control"
-                                    onChange={(e) =>
-                                        handleProduitChange(produit.id, 'quantite', e.target.value)
-                                    }
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    className="form-control"
-                                    onChange={(e) =>
-                                        handleProduitChange(produit.id, 'prix_unitaire', e.target.value)
-                                    }
-                                />
-                            </td>
-                        </tr>
-                    ))}
+                    {produits.map(produit => {
+                        const selection = selectedProduits.find(p => p.id === produit.id) || {};
+                        return (
+                            <tr key={produit.id}>
+                                <td>{produit.designation}</td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="form-control"
+                                        value={selection.quantite || ''}
+                                        onChange={(e) =>
+                                            handleProduitChange(produit.id, 'quantite', e.target.value)
+                                        }
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={selection.prix_unitaire || 0}
+                                        readOnly
+                                    />
+                                </td>
+                                <td>
+                                    {selection.quantite && selection.prix_unitaire
+                                        ? calculTotalProduit(selection.quantite, selection.prix_unitaire)
+                                        : 0}
+                                </td>
+                            </tr>
+                        );
+                    })}
                     </tbody>
                 </table>
 
-                {errors.produits && <div className="text-danger">{errors.produits[0]}</div>}
+                <h5 className="text-end">💰 Total commande : <strong>{calculTotalCommande()} Ar</strong></h5>
 
                 <button type="submit" className="btn btn-primary">Valider la commande</button>
             </form>
