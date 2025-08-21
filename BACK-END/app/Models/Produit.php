@@ -27,4 +27,10 @@ class Produit extends Model
     {
         return $this->hasMany(Mouvement::class, 'id_produit');
     }
+    public function devis()
+    {
+        return $this->belongsToMany(Devis::class, 'devis_produit')
+            ->withPivot('quantite', 'prix_unitaire', 'prix_total')
+            ->withTimestamps();
+    }
 }

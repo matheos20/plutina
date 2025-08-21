@@ -16,6 +16,7 @@ import ModifierProduit from './pages/Produit/ModifierProduit';
 import AjouterCommande from "./pages/Commande/AjouterCommande"; // adapte selon ton chemin
 import ModifierCommande from "./pages/Commande/ModifierCommande"; // adapte selon ton chemin
 import DetailsCommande from './pages/Commande/DetailsCommande';
+import Devis from "./pages/Devis/Devis";
 
 
 
@@ -62,9 +63,9 @@ function App() {
                             <Route path="commandes/:id" element={<DetailsCommande />} />
                             <Route path="commandes/ajouter" element={<AjouterCommande />} />
                             <Route path="commandes/:id/edit" element={<ModifierCommande />} />
+                            <Route path="devis" element={<Devis />} />
 
                             {/* Autres routes du Dashboard */}
-                            <Route path="devis" element={<div>Gestion devis</div>} />
                             <Route path="factures" element={<div>Gestion factures</div>} />
                             <Route path="statistiques" element={<div>Statistiques</div>} />
                             <Route path="clients" element={<div>Clients</div>} />

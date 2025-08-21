@@ -8,6 +8,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\TypeClientController;
 use App\Models\TypeClient;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\DevisController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+Route::get('/devis', [DevisController::class, 'index']);
+Route::post('/devis', [DevisController::class, 'store']);
+Route::get('/devis/{id}', [DevisController::class, 'show']);
+Route::put('/devis/{id}', [DevisController::class, 'update']);
+Route::delete('/devis/{id}', [DevisController::class, 'destroy']);
+
+Route::post('/devis/{id}/accepter', [DevisController::class, 'accepter']);
+Route::post('/devis/{id}/refuser', [DevisController::class, 'refuser']);
+Route::post('/devis/{id}/transformer', [DevisController::class, 'transformerEnCommande']);
 
 
 Route::post('/register', [AuthController::class, 'register']);

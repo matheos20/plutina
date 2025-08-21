@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('devis', function (Blueprint $table) {
             $table->id();
-            $table->string('reference');
+            $table->string('reference')->unique();
             $table->decimal('total', 10, 2);
             $table->enum('etat', ['en attente', 'accepté', 'refusé'])->default('en attente');
             $table->date('date_devis');
