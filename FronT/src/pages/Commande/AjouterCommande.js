@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import './AjouterCommande.css';
 
 function AjouterCommande() {
     const [clients, setClients] = useState([]);
@@ -9,6 +10,13 @@ function AjouterCommande() {
     const [debut_location, setDebutLocation] = useState('');
     const [fin_location, setFinLocation] = useState('');
     const [errors, setErrors] = useState({});
+
+    // Ajout d'un state pour la recherche
+    const [termeRecherche, setTermeRecherche] = useState('');
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const produitsParPage = 4; // 4 produits par page, comme dans l'image
 
     useEffect(() => {
         fetchClients();
@@ -26,63 +34,56 @@ function AjouterCommande() {
 
     const fetchProduits = async () => {
         try {
-            const res = await api.get('/produits');
-            setProduits(res.data.data); // adapter si nécessaire
+            const res = await api.get('/produits/all');
+            const data = Array.isArray(res.data)
+                ? res.data
+                : (res.data && Array.isArray(res.data.data) ? res.data.data : []);
+            setProduits(data);
+            setCurrentPage(1); // revient à la page 1 quand on recharge
         } catch (error) {
             console.error("Erreur chargement produits :", error);
         }
     };
 
-    const handleProduitChange = (produitId, field, value) => {
+    const handleProduitChange = (produitId, value) => {
+        const quantite = parseInt(value, 10);
+
         setSelectedProduits(prev => {
             const existing = prev.find(p => p.id === produitId);
             const produitData = produits.find(p => p.id === produitId);
             let updatedProduits;
 
-            if (existing) {
-                const updated = prev.map(p =>
-                    p.id === produitId ? { ...p, [field]: value } : p
-                );
-                updatedProduits = updated;
-            } else {
-                const nouveauProduit = {
-                    id: produitId,
-                    quantite: field === 'quantite' ? parseInt(value) : 1,
-                    prix_unitaire: 0,
-                    type_prix: produitData?.type_prix || 'unitaire',
-                    prix: produitData?.prix || 0,
-                    quantite_par_lot: produitData?.quantite_par_lot || 1
-                };
-                updatedProduits = [...prev, nouveauProduit];
-            }
-
-            // Recalculer les prix unitaires
-            return updatedProduits.map(p => {
-                if (p.id === produitId) {
-                    let prixUnitaire = 0;
-                    if (p.type_prix === 'proportionnel' && p.quantite_par_lot) {
-                        prixUnitaire = p.prix / p.quantite_par_lot;
-                    } else {
-                        prixUnitaire = p.prix;
-                    }
-                    return {
-                        ...p,
-                        quantite: field === 'quantite' ? parseInt(value) : p.quantite,
-                        prix_unitaire: prixUnitaire,
+            if (quantite > 0) {
+                if (existing) {
+                    updatedProduits = prev.map(p =>
+                        p.id === produitId ? { ...p, quantite: quantite } : p
+                    );
+                } else {
+                    const nouveauProduit = {
+                        id: produitId,
+                        quantite: quantite,
+                        prix_unitaire: produitData?.prix || 0,
                     };
+                    updatedProduits = [...prev, nouveauProduit];
                 }
-                return p;
-            });
+            } else {
+                updatedProduits = prev.filter(p => p.id !== produitId);
+            }
+            return updatedProduits;
         });
     };
 
     const calculTotalProduit = (quantite, prix_unitaire) => {
-        return quantite * prix_unitaire;
+        const q = Number(quantite || 0);
+        const pu = Number(prix_unitaire || 0);
+        return q * pu;
     };
 
     const calculTotalCommande = () => {
         return selectedProduits.reduce((total, p) => {
-            return total + calculTotalProduit(p.quantite, p.prix_unitaire);
+            const produitOriginal = produits.find(prod => prod.id === p.id);
+            const prixUnitaire = produitOriginal?.prix || 0;
+            return total + calculTotalProduit(p.quantite, prixUnitaire);
         }, 0);
     };
 
@@ -93,11 +94,16 @@ function AjouterCommande() {
             id_client: selectedClient,
             debut_location,
             fin_location,
-            produits: selectedProduits.map(p => ({
-                id: p.id,
-                quantite: parseInt(p.quantite),
-                prix_unitaire: parseFloat(p.prix_unitaire),
-            }))
+            produits: selectedProduits
+                .filter(p => Number(p.quantite) > 0)
+                .map(p => {
+                    const produitOriginal = produits.find(prod => prod.id === p.id);
+                    return {
+                        id: p.id,
+                        quantite: parseInt(p.quantite, 10),
+                        prix_unitaire: parseFloat(produitOriginal?.prix || 0),
+                    }
+                })
         };
 
         try {
@@ -119,10 +125,22 @@ function AjouterCommande() {
         }
     };
 
+    // Filtre les produits en fonction du terme de recherche
+    const produitsFiltres = produits.filter(produit =>
+        produit.designation.toLowerCase().includes(termeRecherche.toLowerCase())
+    );
+
+    // Pagination calcul pour les produits filtrés
+    const totalPages = Math.max(1, Math.ceil(produitsFiltres.length / produitsParPage));
+    const start = (currentPage - 1) * produitsParPage;
+    const end = start + produitsParPage;
+    const produitsAffiches = produitsFiltres.slice(start, end);
+
     return (
         <div className="container mt-4">
             <h2>Ajouter une commande</h2>
             <form onSubmit={handleSubmit}>
+                {/* Client */}
                 <div className="mb-3">
                     <label>Client</label>
                     <select
@@ -141,6 +159,7 @@ function AjouterCommande() {
                     {errors.id_client && <div className="text-danger">{errors.id_client[0]}</div>}
                 </div>
 
+                {/* Dates */}
                 <div className="mb-3">
                     <label>Date début location</label>
                     <input
@@ -151,7 +170,6 @@ function AjouterCommande() {
                         required
                     />
                 </div>
-
                 <div className="mb-3">
                     <label>Date fin location</label>
                     <input
@@ -163,55 +181,80 @@ function AjouterCommande() {
                     />
                 </div>
 
+                {/* Recherche de produits et titre */}
                 <h5 className="mt-4">Produits</h5>
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th>Désignation</th>
-                        <th>Quantité</th>
-                        <th>Prix unitaire</th>
-                        <th>Total ligne</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {produits.map(produit => {
-                        const selection = selectedProduits.find(p => p.id === produit.id) || {};
-                        return (
-                            <tr key={produit.id}>
-                                <td>{produit.designation}</td>
-                                <td>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        className="form-control"
-                                        value={selection.quantite || ''}
-                                        onChange={(e) =>
-                                            handleProduitChange(produit.id, 'quantite', e.target.value)
-                                        }
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={selection.prix_unitaire || 0}
-                                        readOnly
-                                    />
-                                </td>
-                                <td>
-                                    {selection.quantite && selection.prix_unitaire
-                                        ? calculTotalProduit(selection.quantite, selection.prix_unitaire)
-                                        : 0}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    </tbody>
-                </table>
+                <div className="mb-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Rechercher un produit..."
+                        value={termeRecherche}
+                        onChange={(e) => {
+                            setTermeRecherche(e.target.value);
+                            setCurrentPage(1); // Réinitialise la pagination lors de la recherche
+                        }}
+                    />
+                </div>
 
+                {/* Liste des produits sous forme de cartes */}
+                <div className="row">
+                    {produitsAffiches.length > 0 ? (
+                        produitsAffiches.map(produit => {
+                            const selection = selectedProduits.find(p => p.id === produit.id) || {};
+                            return (
+                                <div className="col-md-3 mb-4" key={produit.id}>
+                                    <div className="card shadow-sm h-100">
+                                        <div className="card-body text-center">
+                                            <h5 className="card-title">{produit.designation}</h5>
+                                            <p>Prix : {produit.prix} Ar</p>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Quantité"
+                                                className="form-control mb-2"
+                                                value={selection.quantite || ''}
+                                                onChange={(e) => handleProduitChange(produit.id, e.target.value)}
+                                            />
+                                            <p>Total : {selection.quantite ? calculTotalProduit(selection.quantite, produit.prix) : 0} Ar</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="col-12">
+                            <p>Aucun produit trouvé pour votre recherche.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="d-flex justify-content-center align-items-center my-3">
+                        <button
+                            type="button"
+                            className="btn btn-light mx-2"
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            ◀
+                        </button>
+                        <span>Page {currentPage} / {totalPages}</span>
+                        <button
+                            type="button"
+                            className="btn btn-light mx-2"
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                        >
+                            ▶
+                        </button>
+                    </div>
+                )}
+
+                {/* Total */}
                 <h5 className="text-end">💰 Total commande : <strong>{calculTotalCommande()} Ar</strong></h5>
 
-                <button type="submit" className="btn btn-primary">Valider la commande</button>
+                <button type="submit" className="btn btn-primary w-100">Valider la commande</button>
             </form>
         </div>
     );

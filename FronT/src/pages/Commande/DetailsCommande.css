@@ -1,0 +1,111 @@
+/* src/components/DetailsCommande/DetailsCommande.css */
+
+.details-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.details-header h2 {
+    font-size: 2rem;
+    color: #343a40;
+}
+
+.btn-back {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.details-card {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.details-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.details-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.details-section h3 {
+    font-size: 1.5rem;
+    color: #495057;
+    margin-bottom: 1rem;
+    border-left: 4px solid #007bff;
+    padding-left: 1rem;
+}
+
+.details-etat {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+/* Styles des états spécifiques */
+.details-etat.En-cours {
+    background-color: #ffc107; /* Jaune */
+}
+
+.details-etat.Terminée {
+    background-color: #28a745; /* Vert */
+}
+
+.produits-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.produits-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e9ecef;
+}
+
+.produits-list li:last-child {
+    border-bottom: none;
+}
+
+.details-total {
+    text-align: right;
+    margin-top: 2rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #343a40;
+}
+
+.total-value {
+    color: #007bff;
+    margin-left: 1rem;
+}

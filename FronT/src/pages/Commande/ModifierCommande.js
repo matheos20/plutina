@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import './ModifierCommande.css';
+import './ModifierCommande.css'; // S'assurer que le fichier CSS existe
 import api from '../../services/api';
 
 const ModifierCommande = () => {
@@ -19,14 +19,14 @@ const ModifierCommande = () => {
                 const [commandeRes, clientsRes, produitsRes] = await Promise.all([
                     api.get(`/commandes/${id}`),
                     api.get('/clients'),
-                    api.get('/produits'),
+                    api.get('/produits/all'), // Utiliser la route pour tous les produits non paginés
                 ]);
 
                 const produitsCommande = commandeRes.data.produits.map(p => ({
                     id: p.id,
                     designation: p.designation,
                     quantite: p.pivot.quantite,
-                    prix_unitaire: p.pivot.prix_unitaire,
+                    prix_unitaire: parseFloat(p.pivot.prix_unitaire), // S'assurer que c'est un nombre
                     mode_prix: p.mode_prix,
                     prix: p.prix,
                     quantite_lot: p.quantite_lot,
@@ -39,14 +39,19 @@ const ModifierCommande = () => {
                     produits: produitsCommande,
                 });
 
+                // Assurer que les données des produits sont des tableaux
+                const produitsData = Array.isArray(produitsRes.data)
+                    ? produitsRes.data
+                    : (produitsRes.data && Array.isArray(produitsRes.data.data) ? produitsRes.data.data : []);
+
                 setClients(clientsRes.data);
-                setProduitsDisponibles(produitsRes.data.data);
+                setProduitsDisponibles(produitsData);
                 setLoading(false);
             } catch (error) {
                 console.error('Erreur de chargement:', error);
+                setLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -63,34 +68,42 @@ const ModifierCommande = () => {
     }, [commande]);
 
     const handleProduitChange = (index, field, value) => {
-        const produits = [...commande.produits];
-        const produit = { ...produits[index], [field]: value };
+        const updatedProduits = [...commande.produits];
+        let produit = { ...updatedProduits[index] };
 
         if (field === 'id') {
-            const prodDetails = produitsDisponibles.find(p => p.id == value);
+            const prodDetails = produitsDisponibles.find(p => p.id === parseInt(value));
             if (prodDetails) {
-                produit.designation = prodDetails.designation;
-                produit.mode_prix = prodDetails.mode_prix;
-                produit.prix = prodDetails.prix;
-                produit.quantite_lot = prodDetails.quantite_lot;
+                produit = {
+                    ...prodDetails,
+                    id: prodDetails.id,
+                    designation: prodDetails.designation,
+                    quantite: 1, // Réinitialise la quantité à 1 lors du changement de produit
+                    mode_prix: prodDetails.mode_prix,
+                    prix: parseFloat(prodDetails.prix),
+                    quantite_lot: parseFloat(prodDetails.quantite_lot),
+                };
 
-                if (prodDetails.mode_prix === 'proportionnel') {
-                    const prixParUnite = prodDetails.prix / prodDetails.quantite_lot;
-                    produit.prix_unitaire = prixParUnite.toFixed(2);
+                if (prodDetails.mode_prix === 'proportionnel' && prodDetails.quantite_lot) {
+                    produit.prix_unitaire = (parseFloat(prodDetails.prix) / parseFloat(prodDetails.quantite_lot));
                 } else {
-                    produit.prix_unitaire = prodDetails.prix.toFixed(2);
+                    produit.prix_unitaire = parseFloat(prodDetails.prix);
                 }
+            } else {
+                // Si l'option "Choisir produit" est sélectionnée
+                produit = { id: '', designation: '', quantite: 0, prix_unitaire: 0 };
             }
+        } else {
+            produit = { ...produit, [field]: parseFloat(value) };
         }
 
-
-        if (field === 'quantite' && produit.mode_prix === 'proportionnel') {
-            const prixParUnite = produit.prix / produit.quantite_lot;
-            produit.prix_unitaire = (prixParUnite).toFixed(2);
+        // Gérer le prix unitaire si le mode est proportionnel
+        if (field === 'quantite' && produit.mode_prix === 'proportionnel' && produit.quantite_lot) {
+            produit.prix_unitaire = (produit.prix / produit.quantite_lot);
         }
 
-        produits[index] = produit;
-        setCommande({ ...commande, produits });
+        updatedProduits[index] = produit;
+        setCommande({ ...commande, produits: updatedProduits });
     };
 
     const ajouterProduit = () => {
@@ -121,11 +134,13 @@ const ModifierCommande = () => {
                 id_client: commande.id_client,
                 debut_location: commande.debut_location,
                 fin_location: commande.fin_location,
-                produits: commande.produits.map(p => ({
-                    id: p.id,
-                    quantite: parseFloat(p.quantite),
-                    prix_unitaire: parseFloat(p.prix_unitaire),
-                })),
+                produits: commande.produits
+                    .filter(p => p.id && parseFloat(p.quantite) > 0)
+                    .map(p => ({
+                        id: p.id,
+                        quantite: parseFloat(p.quantite),
+                        prix_unitaire: parseFloat(p.prix_unitaire),
+                    })),
             };
             await api.put(`/commandes/${id}`, payload);
             alert("Commande modifiée avec succès !");
@@ -139,112 +154,123 @@ const ModifierCommande = () => {
     if (loading || !commande) return <p>Chargement...</p>;
 
     return (
-        <div className="p-4 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Modifier Commande #{id}</h2>
+        <div className="modifier-commande-container">
+            <h2 className="modifier-commande-title">Modifier Commande #{id}</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow p-4 rounded-xl">
-                <div>
-                    <label>Client :</label>
-                    <select
-                        value={commande.id_client}
-                        onChange={(e) => setCommande({ ...commande, id_client: e.target.value })}
-                        className="border rounded p-2 w-full"
-                    >
-                        {clients.map(client => (
-                            <option key={client.id} value={client.id}>
-                                {client.nom} {client.prenom}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+            <form onSubmit={handleSubmit} className="modifier-commande-form">
+                <div className="section-client-dates">
+                    <div className="form-group">
+                        <label>Client :</label>
+                        <select
+                            value={commande.id_client}
+                            onChange={(e) => setCommande({ ...commande, id_client: e.target.value })}
+                            className="form-control"
+                        >
+                            {clients.map(client => (
+                                <option key={client.id} value={client.id}>
+                                    {client.nom} {client.prenom}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div className="flex gap-4">
-                    <div className="flex-1">
-                        <label>Date début :</label>
-                        <input
-                            type="datetime-local"
-                            value={commande.debut_location}
-                            onChange={(e) => setCommande({ ...commande, debut_location: e.target.value })}
-                            className="border rounded p-2 w-full"
-                        />
-
-                        <label>Date fin :</label>
-                        <input
-                            type="datetime-local"
-                            value={commande.fin_location}
-                            onChange={(e) => setCommande({ ...commande, fin_location: e.target.value })}
-                            className="border rounded p-2 w-full"
-                        />
+                    <div className="date-group">
+                        <div className="form-group">
+                            <label>Date début :</label>
+                            <input
+                                type="datetime-local"
+                                value={commande.debut_location}
+                                onChange={(e) => setCommande({ ...commande, debut_location: e.target.value })}
+                                className="form-control"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Date fin :</label>
+                            <input
+                                type="datetime-local"
+                                value={commande.fin_location}
+                                onChange={(e) => setCommande({ ...commande, fin_location: e.target.value })}
+                                className="form-control"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <h3 className="text-xl font-semibold mb-2">Produits</h3>
-                    {commande.produits.map((prod, index) => (
-                        <div key={index} className="produit-grid">
-                            <select
-                                value={prod.id}
-                                onChange={(e) => handleProduitChange(index, 'id', e.target.value)}
-                                className="border p-2 rounded"
-                            >
-                                <option value="">-- Choisir produit --</option>
-                                {produitsDisponibles.map(p => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.designation}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <input
-                                type="number"
-                                min="1"
-                                value={prod.quantite}
-                                onChange={(e) => handleProduitChange(index, 'quantite', e.target.value)}
-                                className="border p-2 rounded"
-                            />
-
-                            <input
-                                type="number"
-                                value={prod.prix_unitaire}
-                                onChange={(e) => {
-                                    if (prod.mode_prix !== 'proportionnel') {
-                                        handleProduitChange(index, 'prix_unitaire', e.target.value);
-                                    }
-                                }}
-                                className="border p-2 rounded bg-gray-100"
-                                readOnly={prod.mode_prix === 'proportionnel'}
-                            />
-
-
-                            <span className="text-sm border p-2">
-                                {prod.mode_prix === 'proportionnel' ? '💡 proportionnel' : '🧾 unitaire'}
-                            </span>
-                            <span className="text-sm">
-                                {(prod.quantite * prod.prix_unitaire).toLocaleString()} Ar
-                            </span>
-                            <button
-                                type="button"
-                                onClick={() => supprimerProduit(index)}
-                                className="bg-red-600 text-white px-3 py-1 rounded"
-                            >
-                                Supprimer
-                            </button>
-
+                <div className="section-produits">
+                    <h3 className="section-title">Produits de la commande</h3>
+                    <div className="produits-table">
+                        <div className="table-header">
+                            <span>Produit</span>
+                            <span>Quantité</span>
+                            <span>Prix Unitaire</span>
+                            <span>Type</span>
+                            <span>Total</span>
+                            <span>Action</span>
                         </div>
-                    ))}
+                        {commande.produits.map((prod, index) => (
+                            <div key={index} className="table-row">
+                                <select
+                                    value={prod.id}
+                                    onChange={(e) => handleProduitChange(index, 'id', e.target.value)}
+                                    className="form-control"
+                                >
+                                    <option value="">-- Choisir produit --</option>
+                                    {produitsDisponibles.map(p => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.designation}
+                                        </option>
+                                    ))}
+                                </select>
 
-                    <button type="button" onClick={ajouterProduit} className="ajouter-produit-btn">
-                        + Ajouter un produit
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={prod.quantite}
+                                    onChange={(e) => handleProduitChange(index, 'quantite', e.target.value)}
+                                    className="form-control"
+                                />
+
+                                <input
+                                    type="number"
+                                    value={parseFloat(prod.prix_unitaire).toFixed(2)}
+                                    className="form-control readonly-input"
+                                    readOnly={true}
+                                />
+
+                                <span className="cell-info">{prod.mode_prix || 'N/A'}</span>
+                                <span className="cell-total">
+                                    {(parseFloat(prod.quantite) * parseFloat(prod.prix_unitaire) || 0).toLocaleString()} Ar
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => supprimerProduit(index)}
+                                    className="btn-delete-produit"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="add-product-btn-container">
+                        <button type="button" onClick={ajouterProduit} className="ajouter-produit-btn">
+                            + Ajouter un produit
+                        </button>
+                    </div>
+                </div>
+
+                <div className="total-section">
+                    <div className="total-commande">
+                        <span>💰 Total commande :</span>
+                        <strong>{totalCommande.toLocaleString()} Ar</strong>
+                    </div>
+                </div>
+
+                <div className="form-actions">
+                    <button type="submit" className="btn-submit">
+                        Enregistrer les modifications
                     </button>
                 </div>
-
-                <div className="mt-4 text-right font-bold text-lg">
-                    💰 Total commande : {totalCommande.toLocaleString()} Ar
-                </div>
-
-                <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded">
-                    Enregistrer les modifications
-                </button>
             </form>
         </div>
     );

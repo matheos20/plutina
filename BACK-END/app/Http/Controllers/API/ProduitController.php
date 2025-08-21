@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 
 class ProduitController extends Controller
 {
+    public function allProduits()
+    {
+        // Tous les produits
+        $produits = Produit::orderBy('designation', 'asc')->get();
+        return response()->json($produits);
+    }
+
     // Lister tous les produits
     public function index(Request $request)
     {
@@ -25,12 +32,14 @@ class ProduitController extends Controller
         return $query->latest()->paginate(4);
     }
 
+
     // Créer un nouveau produit
     public function store(Request $request)
     {
         $validated = $request->validate([
             'designation' => 'required|string|max:255',
             'quantite' => 'required|integer',
+            'quantite_par_lot' => 'nullable|integer',
             'reference' => 'required|string|max:255|unique:produits',
             'prix' => 'required|numeric',
             'image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/avif,image/jpg|max:3048',
@@ -63,6 +72,7 @@ class ProduitController extends Controller
         $validated = $request->validate([
             'designation' => 'sometimes|string|max:255',
             'quantite' => 'sometimes|integer',
+            'quantite_par_lot' => 'nullable|integer',
             'reference' => 'sometimes|string|max:255|unique:produits,reference,' . $id,
             'prix' => 'sometimes|numeric',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,avif,webp|max:3048',

@@ -1,0 +1,89 @@
+.ajouter-commande-container {
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.loading {
+    text-align: center;
+    font-style: italic;
+}
+
+.produits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.produit-card {
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    background: white;
+    transition: 0.3s;
+}
+
+.produit-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.produit-card h4 {
+    margin-bottom: 8px;
+}
+
+.produit-card button {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.produit-card button:hover {
+    background: #0056b3;
+}
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination button {
+    padding: 6px 10px;
+    margin: 0 5px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.pagination span {
+    margin: 0 10px;
+}
+
+.commande-section {
+    margin-top: 30px;
+}
+
+.commande-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.commande-section th, .commande-section td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.commande-section th {
+    background: #f8f8f8;
+}

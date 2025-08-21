@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Produit extends Model
 {
-    protected $fillable = ['designation', 'quantite', 'reference', 'prix', 'image'];
+    protected $fillable = ['designation', 'quantite', 'quantite_par_lot', 'reference', 'prix','prix_par_lot', 'mode_prix', 'image'];
 
     // Ajout pour retourner l'URL complète de l'image
     protected $appends = ['image_url'];

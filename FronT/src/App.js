@@ -15,7 +15,7 @@ import FicheProduitAdmin from "./pages/Produit/FicheProduitAdmin";
 import ModifierProduit from './pages/Produit/ModifierProduit';
 import AjouterCommande from "./pages/Commande/AjouterCommande"; // adapte selon ton chemin
 import ModifierCommande from "./pages/Commande/ModifierCommande"; // adapte selon ton chemin
-
+import DetailsCommande from './pages/Commande/DetailsCommande';
 
 
 
@@ -30,37 +30,52 @@ function App() {
                     <Navbar />
                     <Routes>
 
+                        {/* === Routes publiques === */}
                         <Route path="/" element={<Home />} />
                         <Route path="/produits" element={<Produits />} />
                         <Route path="/commandes" element={<Commande />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
 
-                    <Route path="/dashboard" element={<Dashboard />}>
-                        <Route path="utilisateurs" element={<Utilisateurs />} />
+                        {/*
+            La route pour les détails de commande en public.
+            C'est une route absolue, donc pas de problème ici.
+            Cependant, l'URL sera /commandes/:id, et non /dashboard/commandes/:id
+          */}
+                        <Route path="/commandes/:id" element={<DetailsCommande />} />
 
-                        <Route path="produits" element={<Produits />} />
-                        <Route path="produits/:id" element={<FicheProduitAdmin />} />
-                        <Route path="produits/:id/edit" element={<ModifierProduit />} />
+                        {/*
+            === Routes protégées (imbriquées dans le Dashboard) ===
+            Toutes les routes ici sont RELATIVES au chemin parent /dashboard
+          */}
+                        <Route path="/dashboard" element={<Dashboard />}>
+                            {/* Utilisateurs */}
+                            <Route path="utilisateurs" element={<Utilisateurs />} />
 
-                        <Route path="commandes" element={<Commande />} />
-                        <Route path="commandes/ajouter" element={<AjouterCommande />} />
-                        {/*<Route path="commandes/modifier/:id" element={<ModifierCommande />} />*/}
-                        <Route path="commandes/:id/edit" element={<ModifierCommande />} />
+                            {/* Produits */}
+                            <Route path="produits" element={<Produits />} />
+                            <Route path="produits/:id" element={<FicheProduitAdmin />} />
+                            <Route path="produits/:id/edit" element={<ModifierProduit />} />
 
+                            {/* Commandes */}
+                            <Route path="commandes" element={<Commande />} />
+                            <Route path="commandes/:id" element={<DetailsCommande />} />
+                            <Route path="commandes/ajouter" element={<AjouterCommande />} />
+                            <Route path="commandes/:id/edit" element={<ModifierCommande />} />
 
-                        <Route path="devis" element={<div>Gestion devis</div>} />
-                        <Route path="factures" element={<div>Gestion factures</div>} />
-                        <Route path="statistiques" element={<div>Statistiques</div>} />
-                        <Route path="ajouter-commande" element={<div>Ajouter commande</div>} />
-                        <Route path="clients" element={<div>Clients</div>} />
-                        <Route path="mes-produits" element={<div>Mes produits</div>} />
-                        <Route path="mes-commandes" element={<div>Mes commandes</div>} />
-                        <Route path="mes-devis" element={<div>Mes devis</div>} />
-                        <Route path="mes-factures" element={<div>Mes factures</div>} />
-                        <Route path="profil" element={<div>Mon profil</div>} />
-                        <Route path="assistance" element={<div>Assistance</div>} />
-                    </Route>
+                            {/* Autres routes du Dashboard */}
+                            <Route path="devis" element={<div>Gestion devis</div>} />
+                            <Route path="factures" element={<div>Gestion factures</div>} />
+                            <Route path="statistiques" element={<div>Statistiques</div>} />
+                            <Route path="clients" element={<div>Clients</div>} />
+                            <Route path="mes-produits" element={<div>Mes produits</div>} />
+                            <Route path="mes-commandes" element={<div>Mes commandes</div>} />
+                            <Route path="mes-devis" element={<div>Mes devis</div>} />
+                            <Route path="mes-factures" element={<div>Mes factures</div>} />
+                            <Route path="profil" element={<div>Mon profil</div>} />
+                            <Route path="assistance" element={<div>Assistance</div>} />
+                        </Route>
+
                     </Routes>
                     <Footer />
                 </>
