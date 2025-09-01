@@ -17,6 +17,8 @@ import AjouterCommande from "./pages/Commande/AjouterCommande"; // adapte selon 
 import ModifierCommande from "./pages/Commande/ModifierCommande"; // adapte selon ton chemin
 import DetailsCommande from './pages/Commande/DetailsCommande';
 import Devis from "./pages/Devis/Devis";
+import DevisPage from "./pages/Devis/DevisPage";
+
 
 
 
@@ -37,6 +39,7 @@ function App() {
                         <Route path="/commandes" element={<Commande />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/devis" element={<DevisPage />} />
 
                         {/*
             La route pour les détails de commande en public.

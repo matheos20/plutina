@@ -20,4 +20,22 @@ api.interceptors.request.use(config => {
     return Promise.reject(error);
 });
 
+
+// // 🔹 Créer un devis
+// export const createDevis = async (data) => {
+//     return api.post('/devis', data);
+// };
+//
+// // 🔹 Récupérer tous les devis
+// export const getDevis = async () => {
+//     return api.get('/devis');
+// };
+//
+// // Récupérer clients et produits pour le formulaire
+// export const getDevisCreateData = async () => {
+//     return api.get('/devis/create');
+// };
+//
+
 export default api;
+

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
-import "./Devis.css"; // ton fichier CSS pour styliser
+import "./DevisPage.css"; // ton fichier CSS pour styliser
 
 function Devis() {
     const [devis, setDevis] = useState([]);

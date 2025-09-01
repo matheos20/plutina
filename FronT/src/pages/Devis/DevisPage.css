@@ -1,0 +1,260 @@
+/* --- Styles existants pour le modal --- */
+/* Styles pour le modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    visibility: hidden; /* Caché par défaut */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease;
+}
+
+.modal-overlay.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.modal-content {
+    background-color: #ffffff; /* Ou n'importe quelle autre couleur (par exemple, lightgray) */
+    padding: 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 700px;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+
+.modal-overlay.visible .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-field {
+    flex: 1;
+}
+
+.form-field input,
+.form-field select {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box; /* Assurez-vous que le padding ne s'ajoute pas à la largeur */
+}
+
+.product-list-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+}
+
+.product-list-item select {
+    flex: 3; /* Donne plus d'espace au select de produit */
+    padding: 10px; /* Augmentation du padding pour la hauteur */
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 0.95em; /* Ajustement de la taille de police */
+}
+
+.product-list-item input {
+    width: 80px;
+    padding: 5px;
+}
+
+.product-list-item input.fixed-price {
+    background: #f0f0f0;
+}
+
+.button-add,
+.button-submit,
+.button-close,
+.button-remove {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.button-add {
+    background: #3498db;
+    margin-top: 10px;
+}
+
+.button-submit {
+    background: #2ecc71;
+}
+
+.button-close {
+    background: #7f8c8d;
+}
+
+.button-remove {
+    background: #e74c3c;
+    padding: 5px 10px;
+}
+
+/* --- NOUVEAUX STYLES POUR LA LISTE DES DEVIS --- */
+.devis-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.devis-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    transition: transform 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.devis-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.devis-header {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.devis-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.devis-header span {
+    font-size: 14px;
+    color: #777;
+}
+
+.devis-details {
+    flex-grow: 1;
+}
+
+.devis-details p {
+    margin: 5px 0;
+    font-size: 15px;
+}
+
+.devis-details strong {
+    color: #555;
+}
+
+.devis-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.status-en-attente {
+    background-color: #ffeedd;
+    color: #d68000;
+}
+
+.status-accepté {
+    background-color: #e6f7e8;
+    color: #2b7d34;
+}
+
+.status-transformé {
+    background-color: #e0f2ff;
+    color: #005f99;
+}
+
+.devis-products {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.devis-products h5 {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 16px;
+}
+
+.devis-products-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.devis-products-list li {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.devis-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.devis-actions button {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.devis-actions .button-accepter {
+    background-color: #2ecc71;
+    color: #fff;
+}
+
+.devis-actions .button-accepter:hover {
+    background-color: #27ae60;
+}
+
+.devis-actions .button-transformer {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.devis-actions .button-transformer:hover {
+    background-color: #2980b9;
+}
+
+.devis-actions .button-annuler {
+    background-color: #c0392b;
+    color: #fff;
+}
+
+.devis-actions .button-annuler:hover {
+    background-color: #a92f23;
+}

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 
@@ -29,7 +28,8 @@ class CommandeController extends Controller
             ], 500);
         }
     }
-    // Creer une nouvelle  commandes
+
+    // Créer une nouvelle commande
     public function store(Request $request)
     {
         try {
@@ -37,11 +37,11 @@ class CommandeController extends Controller
 
             // Validation
             $validatedData = $request->validate([
-                'id_client' => 'required|exists:users,id',
-                'debut_location' => 'required|date',
-                'fin_location' => 'required|date|after:debut_location',
-                'produits' => 'required|array|min:1',
-                'produits.*.id' => 'required|exists:produits,id',
+                'id_client'       => 'required|exists:users,id',
+                'debut_location'  => 'required|date|after_or_equal:today',
+                'fin_location'    => 'required|date|after:debut_location',
+                'produits'        => 'required|array|min:1',
+                'produits.*.id'   => 'required|exists:produits,id',
                 'produits.*.quantite' => 'required|integer|min:1',
                 'produits.*.prix_unitaire' => 'required|numeric|min:0',
             ]);
@@ -53,40 +53,42 @@ class CommandeController extends Controller
 
             // Création de la commande
             $commande = Commande::create([
-                'id_client' => $validatedData['id_client'],
-                'etat' => 'en cours',
-                'prix_total' => $prixTotal,
+                'id_client'      => $validatedData['id_client'],
+                'etat'           => 'en cours',
+                'prix_total'     => $prixTotal,
                 'debut_location' => $validatedData['debut_location'],
-                'fin_location' => $validatedData['fin_location'],
+                'fin_location'   => $validatedData['fin_location'],
             ]);
 
             // Attacher les produits
             foreach ($validatedData['produits'] as $produit) {
                 $commande->produits()->attach($produit['id'], [
-                    'quantite' => $produit['quantite'],
+                    'quantite'      => $produit['quantite'],
                     'prix_unitaire' => $produit['prix_unitaire'],
+                    'prix_total'    => $produit['quantite'] * $produit['prix_unitaire'],
                 ]);
             }
 
             return response()->json([
-                'message' => 'Commande créée avec succès',
+                'message'  => 'Commande créée avec succès',
                 'commande' => $commande->load('produits')
             ], 201);
 
         } catch (\Exception $e) {
             \Log::error('Erreur lors de la création de la commande :', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
             ]);
 
             return response()->json([
-                'error' => 'Erreur interne du serveur',
+                'error'   => 'Erreur interne du serveur',
                 'details' => $e->getMessage()
             ], 500);
         }
     }
-    // Modifier  les commandes
+
+    // Modifier une commande
     public function update(Request $request, $id)
     {
         try {
@@ -94,11 +96,11 @@ class CommandeController extends Controller
 
             // Validation
             $validatedData = $request->validate([
-                'id_client' => 'required|exists:users,id',
-                'debut_location' => 'required|date',
-                'fin_location' => 'required|date|after:debut_location',
-                'produits' => 'required|array|min:1',
-                'produits.*.id' => 'required|exists:produits,id',
+                'id_client'       => 'required|exists:users,id',
+                'debut_location'  => 'required|date|after_or_equal:today',
+                'fin_location'    => 'required|date|after:debut_location',
+                'produits'        => 'required|array|min:1',
+                'produits.*.id'   => 'required|exists:produits,id',
                 'produits.*.quantite' => 'required|integer|min:1',
                 'produits.*.prix_unitaire' => 'required|numeric|min:0',
             ]);
@@ -112,25 +114,26 @@ class CommandeController extends Controller
 
             // Mise à jour de la commande principale
             $commande->update([
-                'id_client' => $validatedData['id_client'],
+                'id_client'      => $validatedData['id_client'],
                 'debut_location' => $validatedData['debut_location'],
-                'fin_location' => $validatedData['fin_location'],
-                'prix_total' => $prixTotal,
+                'fin_location'   => $validatedData['fin_location'],
+                'prix_total'     => $prixTotal,
             ]);
 
-            // Suppression des anciennes associations de produits
+            // Suppression des anciennes associations
             $commande->produits()->detach();
 
-            // Ré-attacher les produits avec nouvelles valeurs
+            // Ré-attacher les produits
             foreach ($validatedData['produits'] as $produit) {
                 $commande->produits()->attach($produit['id'], [
-                    'quantite' => $produit['quantite'],
+                    'quantite'      => $produit['quantite'],
                     'prix_unitaire' => $produit['prix_unitaire'],
+                    'prix_total'    => $produit['quantite'] * $produit['prix_unitaire'],
                 ]);
             }
 
             return response()->json([
-                'message' => 'Commande mise à jour avec succès',
+                'message'  => 'Commande mise à jour avec succès',
                 'commande' => $commande->load('produits')
             ], 200);
 
@@ -141,18 +144,17 @@ class CommandeController extends Controller
         } catch (\Exception $e) {
             \Log::error("Erreur lors de la mise à jour de la commande $id :", [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
             ]);
             return response()->json([
-                'error' => 'Erreur interne du serveur',
+                'error'   => 'Erreur interne du serveur',
                 'details' => $e->getMessage()
             ], 500);
         }
     }
 
-
-//récupérer de commande
+    // Récupérer une commande
     public function show($id)
     {
         try {
@@ -162,14 +164,11 @@ class CommandeController extends Controller
             return response()->json(['error' => 'Commande introuvable'], 404);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erreur interne du serveur',
+                'error'   => 'Erreur interne du serveur',
                 'details' => $e->getMessage()
             ], 500);
         }
     }
-
-
-
 
     // Supprimer une commande
     public function destroy($id)
@@ -186,12 +185,12 @@ class CommandeController extends Controller
             return response()->json(['message' => 'Commande supprimée']);
         } catch (QueryException $e) {
             return response()->json([
-                'error' => 'Erreur de connexion à la base de données.',
+                'error'   => 'Erreur de connexion à la base de données.',
                 'details' => $e->getMessage()
             ], 500);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erreur interne du serveur.',
+                'error'   => 'Erreur interne du serveur.',
                 'details' => $e->getMessage()
             ], 500);
         }

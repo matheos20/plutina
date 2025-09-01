@@ -4,42 +4,50 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Devis;
+use App\Models\User;
 use App\Models\Produit;
-use App\Models\Commande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\DetailDevis;
+use App\Models\Commande;
 
 class DevisController extends Controller
 {
-    /**
-     * 📌 Liste de tous les devis
-     */
-    public function index()
+    // Liste tous les devis
+    public function index(Request $request)
     {
-        try {
-            // Récupérer tous les devis avec client et produits
-            $devis = Devis::with(['client', 'produits'])->get();
-            return response()->json($devis);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erreur lors de la récupération des devis',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $perPage = $request->query('limit', 10); // nombre de devis par page, par défaut 10
+        $devis = Devis::with('client', 'produits')->latest()->paginate($perPage);
+
+        return response()->json($devis);
     }
-    /**
-     * 📌 Créer un nouveau devis
-     */
+
+
+    // Données pour créer un devis (clients + produits)
+    public function create()
+    {
+        $clients = User::all();
+        $produits = Produit::all();
+
+        return response()->json([
+            'clients' => $clients,
+            'produits' => $produits
+        ]);
+    }
+
+    // Créer un devis
     public function store(Request $request)
     {
-        $request->validate([
-            'reference'   => 'required|unique:devis,reference',
-            'date_devis'  => 'required|date',
-            'id_user'     => 'required|exists:users,id',
-            'produits'    => 'required|array',
+        // Validation des données
+        $validatedData = $request->validate([
+            'reference' => 'required|string|max:255|unique:devis,reference',
+            'id_client' => 'required|exists:users,id',
+            'produits' => 'required|array|min:1',
             'produits.*.id' => 'required|exists:produits,id',
             'produits.*.quantite' => 'required|integer|min:1',
+            'produits.*.prix_unitaire' => 'required|numeric|min:0',
+            'debut_location' => 'required|date|after_or_equal:today',
+            'fin_location'   => 'required|date|after:debut_location',
         ]);
 
         DB::beginTransaction();
@@ -47,182 +55,114 @@ class DevisController extends Controller
         try {
             // Création du devis
             $devis = Devis::create([
-                'reference' => $request->reference,
-                'date_devis' => $request->date_devis,
-                'id_user' => $request->id_user,
-                'total' => 0, // sera calculé
+                'reference'      => $validatedData['reference'],
+                'etat'           => 'en attente',
+                'date_devis'     => now(),
+                'total'          => 0,
+                'id_user'        => $validatedData['id_client'],
+                'debut_location' => $validatedData['debut_location'],
+                'fin_location'   => $validatedData['fin_location'],
             ]);
 
             $total = 0;
+            $produitsPivotData = [];
+            $detailsDevisData = [];
 
-            foreach ($request->produits as $prod) {
-                $produit = Produit::findOrFail($prod['id']);
-                $prixUnitaire = $produit->prix;
-                $quantite = $prod['quantite'];
-                $prixTotal = $prixUnitaire * $quantite;
+            foreach ($validatedData['produits'] as $produitData) {
+                $prixTotalProduit = $produitData['quantite'] * $produitData['prix_unitaire'];
+                $total += $prixTotalProduit;
 
-                // Attacher au pivot
-                $devis->produits()->attach($produit->id, [
-                    'quantite' => $quantite,
-                    'prix_unitaire' => $prixUnitaire,
-                    'prix_total' => $prixTotal,
-                ]);
+                $produitsPivotData[$produitData['id']] = [
+                    'quantite'      => $produitData['quantite'],
+                    'prix_unitaire' => $produitData['prix_unitaire'],
+                    'prix_total'    => $prixTotalProduit,
+                ];
 
-                $total += $prixTotal;
+                $detailsDevisData[] = [
+                    'id_devis'      => $devis->id,
+                    'id_produit'    => $produitData['id'],
+                    'quantite'      => $produitData['quantite'],
+                    'prix_unitaire' => $produitData['prix_unitaire'],
+                    'prix_total'    => $prixTotalProduit,
+                ];
+            }
+
+            $devis->produits()->attach($produitsPivotData);
+            if (!empty($detailsDevisData)) {
+                DetailDevis::insert($detailsDevisData);
             }
 
             $devis->update(['total' => $total]);
 
             DB::commit();
-            return response()->json(['message' => 'Devis créé avec succès', 'devis' => $devis->load('produits')], 201);
+
+            return response()->json([
+                'message' => 'Devis créé avec succès !',
+                'devis'   => $devis->load('produits')
+            ], 201);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            DB::rollback();
+            return response()->json([
+                'error' => 'Erreur lors de la création du devis : ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    /**
-     * 📌 Afficher un devis spécifique
-     */
-    public function show($id)
+    // Changer l’état du devis
+    public function changerEtat(Request $request, $id)
     {
-        $devis = Devis::with(['client', 'produits'])->findOrFail($id);
-        return response()->json($devis);
-    }
+        // Définir les états autorisés
+        $etatsAutorises = ['Brouillon', 'en attente', 'accepté', 'refusé', 'transformé', 'annulé'];
 
-    /**
-     * 📌 Modifier un devis (si encore en attente)
-     */
-    public function update(Request $request, $id)
-    {
-        $devis = Devis::findOrFail($id);
-
-        if ($devis->etat !== 'en attente') {
-            return response()->json(['error' => 'Impossible de modifier un devis accepté ou refusé'], 403);
-        }
-
+        // Validation
         $request->validate([
-            'produits'    => 'required|array',
-            'produits.*.id' => 'required|exists:produits,id',
-            'produits.*.quantite' => 'required|integer|min:1',
+            'etat' => ['required', function ($attribute, $value, $fail) use ($etatsAutorises) {
+                if (!in_array($value, $etatsAutorises)) {
+                    $fail("L'état sélectionné est invalide.");
+                }
+            }],
         ]);
 
-        DB::beginTransaction();
-
         try {
-            // Supprimer les anciens produits
-            $devis->produits()->detach();
-            $total = 0;
-
-            foreach ($request->produits as $prod) {
-                $produit = Produit::findOrFail($prod['id']);
-                $prixUnitaire = $produit->prix;
-                $quantite = $prod['quantite'];
-                $prixTotal = $prixUnitaire * $quantite;
-
-                $devis->produits()->attach($produit->id, [
-                    'quantite' => $quantite,
-                    'prix_unitaire' => $prixUnitaire,
-                    'prix_total' => $prixTotal,
-                ]);
-
-                $total += $prixTotal;
-            }
-
-            $devis->update(['total' => $total]);
-
-            DB::commit();
-            return response()->json(['message' => 'Devis modifié avec succès', 'devis' => $devis->load('produits')]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * 📌 Supprimer un devis
-     */
-    public function destroy($id)
-    {
-        $devis = Devis::findOrFail($id);
-        $devis->delete();
-        return response()->json(['message' => 'Devis supprimé avec succès']);
-    }
-
-    /**
-     * 📌 Accepter un devis
-     */
-    public function accepter($id)
-    {
-        $devis = Devis::findOrFail($id);
-
-        if ($devis->etat !== 'en attente') {
-            return response()->json(['error' => 'Ce devis a déjà été traité'], 403);
-        }
-
-        $devis->update(['etat' => 'accepté']);
-        return response()->json(['message' => 'Devis accepté', 'devis' => $devis]);
-    }
-
-    /**
-     * 📌 Refuser un devis
-     */
-    public function refuser($id)
-    {
-        $devis = Devis::findOrFail($id);
-
-        if ($devis->etat !== 'en attente') {
-            return response()->json(['error' => 'Ce devis a déjà été traité'], 403);
-        }
-
-        $devis->update(['etat' => 'refusé']);
-        return response()->json(['message' => 'Devis refusé', 'devis' => $devis]);
-    }
-
-    /**
-     * 📌 Transformer un devis accepté en commande
-     */
-    public function transformerEnCommande($id)
-    {
-        try {
+            // On récupère le devis avec ses produits
             $devis = Devis::with('produits')->findOrFail($id);
 
-            if ($devis->produits->isEmpty()) {
-                return response()->json(['message' => 'Le devis ne contient aucun produit'], 400);
-            }
+            // Mise à jour de l'état
+            $devis->etat = $request->etat;
+            $devis->save();
 
-            if ($devis->etat !== 'accepté') {
-                return response()->json(['message' => 'Le devis doit être accepté avant de le transformer'], 400);
-            }
+            // Transformation en commande si demandé
+            if ($request->etat === 'transformé') {
+                if (!$devis->debut_location || !$devis->fin_location) {
+                    return response()->json([
+                        'error' => 'Impossible de transformer le devis : les dates de location sont manquantes.'
+                    ], 422);
+                }
 
-            $commande = Commande::create([
-                'id_client' => $devis->id_user,
-                'debut_location' => now(),             // ou $devis->date_devis si tu veux
-                'fin_location' => now()->addDays(7),  // exemple : +7 jours
-                'prix_total' => $devis->total,
-            ]);
-
-            foreach ($devis->produits as $produit) {
-                $commande->produits()->attach($produit->id, [
-                    'quantite' => $produit->pivot->quantite,
-                    'prix_unitaire' => $produit->pivot->prix_unitaire,
-                    'prix_total' => $produit->pivot->prix_total,
+                $commande = Commande::create([
+                    'id_client'      => $devis->id_user,
+                    'etat'           => 'en cours',
+                    'prix_total'     => $devis->total,
+                    'debut_location' => $devis->debut_location,
+                    'fin_location'   => $devis->fin_location,
+                    'date_commande'  => now(),
                 ]);
+
+                foreach ($devis->produits as $produit) {
+                    $commande->produits()->attach($produit->id, [
+                        'quantite'      => $produit->pivot->quantite,
+                        'prix_unitaire' => $produit->pivot->prix_unitaire,
+                        'prix_total'    => $produit->pivot->prix_total,
+                    ]);
+                }
             }
 
-            $devis->update(['etat' => 'transformé']); // laisse l’état “accepté”
-
-            return response()->json([
-                'message' => 'Devis transformé en commande avec succès',
-                'commande' => $commande->load('produits')
-            ]);
+            return response()->json(['message' => "État du devis mis à jour avec succès !"]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erreur lors de la transformation du devis',
-                'error' => $e->getMessage()
+                'error' => 'Erreur lors du changement d\'état : ' . $e->getMessage()
             ], 500);
         }
     }

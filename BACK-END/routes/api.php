@@ -38,16 +38,31 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+Route::middleware('auth:sanctum')->group(function () {
+    // Liste tous les devis
+    Route::get('/devis', [DevisController::class, 'index']);
 
-Route::get('/devis', [DevisController::class, 'index']);
-Route::post('/devis', [DevisController::class, 'store']);
-Route::get('/devis/{id}', [DevisController::class, 'show']);
-Route::put('/devis/{id}', [DevisController::class, 'update']);
-Route::delete('/devis/{id}', [DevisController::class, 'destroy']);
+    // Retourne données pour formulaire création (clients + produits)
+    Route::get('/devis/create', [DevisController::class, 'create']);
 
-Route::post('/devis/{id}/accepter', [DevisController::class, 'accepter']);
-Route::post('/devis/{id}/refuser', [DevisController::class, 'refuser']);
-Route::post('/devis/{id}/transformer', [DevisController::class, 'transformerEnCommande']);
+    // Crée un devis
+    Route::post('/devis', [DevisController::class, 'store']);
+
+    // Affiche un devis
+    Route::get('/devis/{devis}', [DevisController::class, 'show']);
+
+    // Édite un devis (retourne données pour modification)
+    Route::get('/devis/{devis}/edit', [DevisController::class, 'edit']);
+
+    // Met à jour un devis
+    Route::put('/devis/{devis}', [DevisController::class, 'update']);
+
+    // Supprime un devis
+    Route::delete('/devis/{devis}', [DevisController::class, 'destroy']);
+});
+
+Route::post('/devis/{id}/changer-etat', [DevisController::class, 'changerEtat']);
+
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -71,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/utilisateurs', [UserController::class, 'store']);
     Route::put('/utilisateurs/{id}', [UserController::class, 'update']);
     Route::delete('/utilisateurs/{id}', [UserController::class, 'destroy']);
+    Route::get('/clients', [UserController::class, 'clientsIndex']);
 });
 
 
