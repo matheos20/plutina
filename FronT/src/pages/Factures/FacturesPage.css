@@ -1,0 +1,166 @@
+/*.factures-page {*/
+/*    padding: 20px;*/
+/*}*/
+
+/*.factures-page h2 {*/
+/*    margin-bottom: 15px;*/
+/*}*/
+
+/*.factures-page table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*}*/
+
+/*.factures-page th,*/
+/*.factures-page td {*/
+/*    border: 1px solid #ddd;*/
+/*    padding: 8px;*/
+/*    text-align: left;*/
+/*}*/
+
+/*.factures-page th {*/
+/*    background-color: #f4f4f4;*/
+/*}*/
+
+/*.factures-page button {*/
+/*    margin-right: 5px;*/
+/*    padding: 4px 8px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/* Fichier : FacturesPage.css */
+
+/* Conteneur principal */
+.factures-page {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #f8f9fa; /* Fond léger */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.factures-page h2 {
+    font-size: 2.2rem;
+    color: #34495e;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Style de la table */
+.factures-page table {
+    width: 100%;
+    border-collapse: separate; /* Permet les border-radius sur les cellules */
+    border-spacing: 0;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden; /* Important pour que les coins arrondis fonctionnent */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.factures-page th,
+.factures-page td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0; /* Ligne de séparation claire */
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.factures-page th {
+    background-color: #ecf0f1; /* Couleur de fond pour l'en-tête */
+    font-weight: 600;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Coins arrondis pour l'en-tête */
+.factures-page th:first-child {
+    border-top-left-radius: 10px;
+}
+.factures-page th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Style des lignes */
+.factures-page tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Coins arrondis pour la dernière ligne */
+.factures-page tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+.factures-page tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+/* Boutons d'action */
+.factures-page .btn {
+    border-radius: 5px; /* Coins légèrement arrondis pour un aspect plus sérieux */
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+}
+/* Bouton Modifier (gris) */
+.factures-page .btn-secondary {
+    background-color: #bdc3c7; /* Gris clair */
+    border-color: #bdc3c7;
+    color: #fff;
+}
+.factures-page .btn-secondary:hover {
+    background-color: #95a5a6;
+    border-color: #95a5a6;
+    transform: translateY(-1px);
+}
+.factures-page .btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+.factures-page .btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-1px);
+}
+.factures-page .btn-success {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: #fff;
+}
+.factures-page .btn-success:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-1px);
+}
+.factures-page .btn-danger {
+    background-color: transparent;
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+}
+.factures-page .btn-danger:hover {
+    background-color: #e74c3c;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Animation de chargement */
+.loading-message {
+    text-align: center;
+    font-style: italic;
+    color: #7f8c8d;
+}
+
+/* Style du modal (Bootstrap) */
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+
+
+
+

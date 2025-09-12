@@ -18,6 +18,7 @@ import ModifierCommande from "./pages/Commande/ModifierCommande"; // adapte selo
 import DetailsCommande from './pages/Commande/DetailsCommande';
 import Devis from "./pages/Devis/Devis";
 import DevisPage from "./pages/Devis/DevisPage";
+import FacturesPage from "./pages/Factures/FacturesPage";
 
 
 
@@ -40,6 +41,8 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/devis" element={<DevisPage />} />
+                        <Route path="/factures" element={<FacturesPage />} />
+
 
                         {/*
             La route pour les détails de commande en public.
@@ -78,6 +81,8 @@ function App() {
                             <Route path="mes-factures" element={<div>Mes factures</div>} />
                             <Route path="profil" element={<div>Mon profil</div>} />
                             <Route path="assistance" element={<div>Assistance</div>} />
+
+                            <Route path="factures" element={<FacturesPage />} />
                         </Route>
 
                     </Routes>

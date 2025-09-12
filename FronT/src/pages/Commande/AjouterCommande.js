@@ -25,12 +25,15 @@ function AjouterCommande() {
 
     const fetchClients = async () => {
         try {
-            const res = await api.get('/clients');
-            setClients(res.data);
+            const res = await api.get('/clients'); // utiliser api et pas axios
+            const data = Array.isArray(res.data.data) ? res.data.data : [];
+            setClients(data);
         } catch (error) {
-            console.error("Erreur chargement clients :", error);
+            console.error("Erreur chargement clients :", error.response?.data || error.message);
         }
     };
+
+
 
     const fetchProduits = async () => {
         try {

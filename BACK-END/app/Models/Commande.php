@@ -34,4 +34,10 @@ class Commande extends Model
     {
         return $this->hasMany(DetailFacture::class, 'id_commande');
     }
+
+    public function facture()
+    {
+        return $this->hasOne(\App\Models\Facture::class, 'id_commande');
+    }
+
 }

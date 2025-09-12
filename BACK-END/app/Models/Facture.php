@@ -6,11 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Facture extends Model
 {
-    protected $fillable = ['reference', 'total', 'date_facture', 'id_client'];
+    protected $fillable = ['reference', 'total', 'date_facture', 'id_user','id_commande'];
 
-    public function client()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'id_client');
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function commande()
+    {
+        return $this->belongsTo(Commande::class, 'id_commande');
     }
 
     public function details()

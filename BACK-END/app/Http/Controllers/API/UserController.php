@@ -8,6 +8,23 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+
+    // Liste uniquement les clients
+    public function clients(Request $request)
+    {
+        $perPage = $request->query('limit', 10);
+
+        $clients = User::where('role', 'client')->paginate($perPage);
+
+        return response()->json([
+            'data' => $clients->items(),
+            'current_page' => $clients->currentPage(),
+            'last_page' => $clients->lastPage(),
+            'per_page' => $clients->perPage(),
+            'total' => $clients->total()
+        ]);
+    }
+
     // Liste tous les utilisateurs
     public function index(Request $request)
     {

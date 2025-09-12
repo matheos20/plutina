@@ -54,7 +54,7 @@ class CommandeController extends Controller
             // Création de la commande
             $commande = Commande::create([
                 'id_client'      => $validatedData['id_client'],
-                'etat'           => 'en cours',
+                'etat'           => $validatedData['etat'] ?? 'en cours',
                 'prix_total'     => $prixTotal,
                 'debut_location' => $validatedData['debut_location'],
                 'fin_location'   => $validatedData['fin_location'],
@@ -138,7 +138,7 @@ class CommandeController extends Controller
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Commande introuvable'], 404);
+            return response()->json(['error' => 'Commande introuvable 1'], 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Données invalides', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -161,7 +161,7 @@ class CommandeController extends Controller
             $commande = Commande::with(['client', 'produits'])->findOrFail($id);
             return response()->json($commande);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Commande introuvable'], 404);
+            return response()->json(['error' => 'Commande introuvable tsy izy ve'], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'error'   => 'Erreur interne du serveur',
@@ -176,7 +176,7 @@ class CommandeController extends Controller
         try {
             $commande = Commande::find($id);
             if (!$commande) {
-                return response()->json(['error' => 'Commande introuvable'], 404);
+                return response()->json(['error' => 'Commande introuvable 3'], 404);
             }
 
             $commande->produits()->detach();
