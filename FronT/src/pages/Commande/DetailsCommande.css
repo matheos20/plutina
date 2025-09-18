@@ -109,3 +109,22 @@
     color: #007bff;
     margin-left: 1rem;
 }
+
+/* src/components/DetailsCommande/DetailsCommande.css */
+
+.details-etat {
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* Couleur selon l'état */
+.details-etat.en-cours {
+    background-color: #f39c12; /* orange pour en cours */
+}
+
+.details-etat.livrée {
+    background-color: #27ae60; /* vert pour livré */
+}

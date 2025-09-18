@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+// produit
+    // Produits avec pagination et recherche
+    Route::get('/produits', [ProduitController::class, 'index']);
 
     // Commandes disponibles pour factures → jamais 404
     // Cette route doit être **avant** /commandes/{id}

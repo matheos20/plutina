@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../services/api';
 import './AjouterCommande.css';
 
 function AjouterCommande() {
-    const [clients, setClients] = useState([]);
+    const location = useLocation();
+    const produitPreSelectionne = location.state?.produit || null;
+
     const [produits, setProduits] = useState([]);
     const [selectedClient, setSelectedClient] = useState('');
     const [selectedProduits, setSelectedProduits] = useState([]);
@@ -11,29 +14,41 @@ function AjouterCommande() {
     const [fin_location, setFinLocation] = useState('');
     const [errors, setErrors] = useState({});
 
-    // Ajout d'un state pour la recherche
+    // Recherche et pagination
     const [termeRecherche, setTermeRecherche] = useState('');
-
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const produitsParPage = 4; // 4 produits par page, comme dans l'image
+    const produitsParPage = 4;
 
+    // Récupération client connecté
     useEffect(() => {
-        fetchClients();
+        const fetchCurrentUser = async () => {
+            try {
+                const res = await api.get('/user'); // API qui retourne le client connecté
+                if (res.data && res.data.id) {
+                    setSelectedClient(res.data.id);
+                }
+            } catch (error) {
+                console.error("Erreur récupération utilisateur connecté :", error);
+            }
+        };
+        fetchCurrentUser();
+    }, []);
+
+    // Récupération des produits
+    useEffect(() => {
         fetchProduits();
     }, []);
 
-    const fetchClients = async () => {
-        try {
-            const res = await api.get('/clients'); // utiliser api et pas axios
-            const data = Array.isArray(res.data.data) ? res.data.data : [];
-            setClients(data);
-        } catch (error) {
-            console.error("Erreur chargement clients :", error.response?.data || error.message);
+    // Pré-sélection du produit depuis l'URL
+    useEffect(() => {
+        if (produitPreSelectionne) {
+            setSelectedProduits([{
+                id: produitPreSelectionne.id,
+                quantite: 1,
+                prix_unitaire: produitPreSelectionne.prix || 0
+            }]);
         }
-    };
-
-
+    }, [produitPreSelectionne]);
 
     const fetchProduits = async () => {
         try {
@@ -42,7 +57,7 @@ function AjouterCommande() {
                 ? res.data
                 : (res.data && Array.isArray(res.data.data) ? res.data.data : []);
             setProduits(data);
-            setCurrentPage(1); // revient à la page 1 quand on recharge
+            setCurrentPage(1);
         } catch (error) {
             console.error("Erreur chargement produits :", error);
         }
@@ -50,7 +65,6 @@ function AjouterCommande() {
 
     const handleProduitChange = (produitId, value) => {
         const quantite = parseInt(value, 10);
-
         setSelectedProduits(prev => {
             const existing = prev.find(p => p.id === produitId);
             const produitData = produits.find(p => p.id === produitId);
@@ -77,15 +91,13 @@ function AjouterCommande() {
     };
 
     const calculTotalProduit = (quantite, prix_unitaire) => {
-        const q = Number(quantite || 0);
-        const pu = Number(prix_unitaire || 0);
-        return q * pu;
+        return Number(quantite || 0) * Number(prix_unitaire || 0);
     };
 
     const calculTotalCommande = () => {
         return selectedProduits.reduce((total, p) => {
             const produitOriginal = produits.find(prod => prod.id === p.id);
-            const prixUnitaire = produitOriginal?.prix || 0;
+            const prixUnitaire = produitOriginal?.prix || p.prix_unitaire || 0;
             return total + calculTotalProduit(p.quantite, prixUnitaire);
         }, 0);
     };
@@ -104,15 +116,15 @@ function AjouterCommande() {
                     return {
                         id: p.id,
                         quantite: parseInt(p.quantite, 10),
-                        prix_unitaire: parseFloat(produitOriginal?.prix || 0),
-                    }
+                        prix_unitaire: parseFloat(produitOriginal?.prix || p.prix_unitaire || 0),
+                    };
                 })
         };
 
         try {
             await api.post('/commandes', payload);
             alert("Commande créée avec succès !");
-            setSelectedClient('');
+            // Reset formulaire
             setSelectedProduits([]);
             setDebutLocation('');
             setFinLocation('');
@@ -128,12 +140,10 @@ function AjouterCommande() {
         }
     };
 
-    // Filtre les produits en fonction du terme de recherche
+    // Filtrage et pagination produits
     const produitsFiltres = produits.filter(produit =>
         produit.designation.toLowerCase().includes(termeRecherche.toLowerCase())
     );
-
-    // Pagination calcul pour les produits filtrés
     const totalPages = Math.max(1, Math.ceil(produitsFiltres.length / produitsParPage));
     const start = (currentPage - 1) * produitsParPage;
     const end = start + produitsParPage;
@@ -143,23 +153,15 @@ function AjouterCommande() {
         <div className="container mt-4">
             <h2>Ajouter une commande</h2>
             <form onSubmit={handleSubmit}>
-                {/* Client */}
+                {/* Client connecté (readonly) */}
                 <div className="mb-3">
                     <label>Client</label>
-                    <select
+                    <input
+                        type="text"
                         className="form-control"
-                        value={selectedClient}
-                        onChange={(e) => setSelectedClient(e.target.value)}
-                        required
-                    >
-                        <option value="">-- Sélectionner un client --</option>
-                        {clients.map(client => (
-                            <option key={client.id} value={client.id}>
-                                {client.nom} {client.prenom}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.id_client && <div className="text-danger">{errors.id_client[0]}</div>}
+                        value="Vous (client connecté)"
+                        disabled
+                    />
                 </div>
 
                 {/* Dates */}
@@ -184,7 +186,7 @@ function AjouterCommande() {
                     />
                 </div>
 
-                {/* Recherche de produits et titre */}
+                {/* Recherche produits */}
                 <h5 className="mt-4">Produits</h5>
                 <div className="mb-3">
                     <input
@@ -192,21 +194,18 @@ function AjouterCommande() {
                         className="form-control"
                         placeholder="Rechercher un produit..."
                         value={termeRecherche}
-                        onChange={(e) => {
-                            setTermeRecherche(e.target.value);
-                            setCurrentPage(1); // Réinitialise la pagination lors de la recherche
-                        }}
+                        onChange={(e) => { setTermeRecherche(e.target.value); setCurrentPage(1); }}
                     />
                 </div>
 
-                {/* Liste des produits sous forme de cartes */}
+                {/* Liste produits */}
                 <div className="row">
                     {produitsAffiches.length > 0 ? (
                         produitsAffiches.map(produit => {
                             const selection = selectedProduits.find(p => p.id === produit.id) || {};
                             return (
                                 <div className="col-md-3 mb-4" key={produit.id}>
-                                    <div className="card shadow-sm h-100">
+                                    <div className={`card shadow-sm h-100 ${selection.quantite > 0 ? 'produit-selectionne' : ''}`}>
                                         <div className="card-body text-center">
                                             <h5 className="card-title">{produit.designation}</h5>
                                             <p>Prix : {produit.prix} Ar</p>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../services/api"; // adapte ce chemin si besoin
+import api from "../../services/api";
 import { Modal } from "bootstrap";
 
 function Produits() {
     const modalRef = useRef(null);
     const navigate = useNavigate();
 
+    const [user, setUser] = useState(null);
     const [produits, setProduits] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [errors, setErrors] = useState({});
@@ -22,6 +23,19 @@ function Produits() {
     const [page, setPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+
+    // Récupère l'utilisateur connecté
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const res = await api.get('/user');
+                setUser(res.data);
+            } catch (error) {
+                console.error("Erreur chargement user :", error);
+            }
+        };
+        fetchUser();
+    }, []);
 
     // Ouvre modal création ou modification
     const openModal = (produit = null) => {
@@ -51,11 +65,15 @@ function Produits() {
         bsModal.show();
     };
 
+    // Redirige vers ajout de commande avec produit pré-sélectionné
+    const handleAjouterCommande = (produit) => {
+        navigate('/dashboard/commandes/ajouter', { state: { produit } });
+    };
+
     // Charge les produits depuis API
     const fetchProduits = async (page = 1, search = "") => {
         try {
             const res = await api.get(`/produits?page=${page}&search=${search}`);
-            console.log("Produits reçus :", res.data.data);
             setProduits(res.data.data);
             setPage(res.data.current_page);
             setLastPage(res.data.last_page);
@@ -97,7 +115,6 @@ function Produits() {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors);
                 alert("Erreur de validation. Vérifiez les champs.");
-                console.error("Erreurs Laravel :", error.response.data.errors);
             } else {
                 console.error("Erreur :", error);
             }
@@ -137,19 +154,10 @@ function Produits() {
 
     // Pagination
     const handlePrev = () => {
-        if (page > 1) {
-            fetchProduits(page - 1, searchTerm);
-        }
+        if (page > 1) fetchProduits(page - 1, searchTerm);
     };
     const handleNext = () => {
-        if (page < lastPage) {
-            fetchProduits(page + 1, searchTerm);
-        }
-    };
-
-    // Navigation vers fiche produit admin
-    const handleVoirProduit = (id) => {
-        navigate(`/dashboard/produits/${id}`);
+        if (page < lastPage) fetchProduits(page + 1, searchTerm);
     };
 
     return (
@@ -157,6 +165,7 @@ function Produits() {
             {successMessage && (
                 <div className="alert alert-success text-center">{successMessage}</div>
             )}
+
             <form
                 className="d-flex justify-content-between align-items-center mb-4"
                 onSubmit={handleSearchSubmit}
@@ -195,14 +204,16 @@ function Produits() {
                     Réinitialiser
                 </button>
 
-                <button
-                    type="button"
-                    className="btn btn-outline-info"
-                    onClick={() => openModal()}
-                    style={{ width: "17%" }}
-                >
-                    Ajouter un produit
-                </button>
+                {user && (user.role === "admin" || user.role === "receptionniste") && (
+                    <button
+                        type="button"
+                        className="btn btn-outline-info"
+                        onClick={() => openModal()}
+                        style={{ width: "17%" }}
+                    >
+                        Ajouter un produit
+                    </button>
+                )}
             </form>
 
             {produits.length === 0 && <p>Aucun produit trouvé.</p>}
@@ -227,8 +238,12 @@ function Produits() {
                                 overflow: "hidden",
                                 transition: "transform 0.2s ease-in-out",
                             }}
-                            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                            onMouseEnter={(e) =>
+                                (e.currentTarget.style.transform = "scale(1.02)")
+                            }
+                            onMouseLeave={(e) =>
+                                (e.currentTarget.style.transform = "scale(1)")
+                            }
                         >
                             {produit.image && (
                                 <div className="text-center bg-light">
@@ -244,40 +259,50 @@ function Produits() {
                                     />
                                 </div>
                             )}
+
                             <div className="card-body d-flex flex-column justify-content-between p-3">
                                 <div className="d-flex justify-content-between">
+                                    {/* Infos produit */}
                                     <div>
                                         <h5 className="card-title text-primary">{produit.designation}</h5>
-                                        <p className="card-text mb-1 text-muted">
-                                            Quantité: {produit.quantite}
-                                        </p>
-                                        <p className="card-text mb-1 text-muted">
-                                            Référence: {produit.reference}
-                                        </p>
+                                        <p className="card-text mb-1 text-muted">Quantité: {produit.quantite}</p>
+                                        <p className="card-text mb-1 text-muted">Référence: {produit.reference}</p>
                                         <p className="card-text mb-1 text-muted">Prix: {produit.prix} €</p>
                                     </div>
-                                    <div className="d-flex flex-column justify-content-end align-items-end">
-                                        <button
-                                            className="btn btn-outline-primary btn-sm mb-2"
-                                            onClick={() => openModal(produit)}
-                                        >
-                                            Modifier
-                                        </button>
-                                        <button
-                                            className="btn btn-outline-danger btn-sm mb-2"
-                                            onClick={() => handleDelete(produit.id)}
-                                        >
-                                            Supprimer
-                                        </button>
+
+                                    {/* Boutons Modifier / Supprimer */}
+                                    {user && (user.role === "admin" || user.role === "receptionniste") && (
+                                        <div className="d-flex flex-column justify-content-start align-items-end">
+                                            <button
+                                                className="btn btn-outline-primary btn-sm mb-2"
+                                                onClick={() => openModal(produit)}
+                                            >
+                                                Modifier
+                                            </button>
+                                            <button
+                                                className="btn btn-outline-danger btn-sm mb-2"
+                                                onClick={() => handleDelete(produit.id)}
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Bouton Ajouter commande pour client, centré sous le prix */}
+                                {user && user.role === "client" && (
+                                    <div className="d-flex justify-content-center mt-3">
                                         <button
                                             className="btn btn-outline-success btn-sm"
-                                            onClick={() => handleVoirProduit(produit.id)}
+                                            style={{ width: "70%" }}
+                                            onClick={() => handleAjouterCommande(produit)}
                                         >
-                                            Voir
+                                            Ajouter commande
                                         </button>
                                     </div>
-                                </div>
+                                )}
                             </div>
+
                         </div>
                     </div>
                 ))}
@@ -297,12 +322,12 @@ function Produits() {
                                 className="page-item disabled"
                                 style={{ marginTop: "23px" }}
                             >
-                <span
-                    className="page-link bg-white border-0"
-                    style={{ pointerEvents: "none" }}
-                >
-                  Page {page} / {lastPage}
-                </span>
+                                <span
+                                    className="page-link bg-white border-0"
+                                    style={{ pointerEvents: "none" }}
+                                >
+                                    Page {page} / {lastPage}
+                                </span>
                             </li>
                             <li className={`page-item ${page === lastPage ? "disabled" : ""}`}>
                                 <button className="page-link" onClick={handleNext}>
@@ -349,70 +374,34 @@ function Produits() {
                                     <label className="form-label">Désignation</label>
                                     <input
                                         type="text"
-                                        className={`form-control ${
-                                            errors.designation ? "is-invalid" : ""
-                                        }`}
+                                        className={`form-control ${errors.designation ? "is-invalid" : ""}`}
                                         name="designation"
                                         value={formData.designation}
                                         onChange={handleChange}
-                                        style={{
-                                            backgroundColor: "#fff",
-                                            borderRadius: "25px",
-                                            border: "1px solid #dee2e6",
-                                            padding: "10px",
-                                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
-                                            fontSize: "14px",
-                                        }}
                                     />
-                                    {errors.designation && (
-                                        <div className="invalid-feedback">{errors.designation[0]}</div>
-                                    )}
+                                    {errors.designation && <div className="invalid-feedback">{errors.designation[0]}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Quantité</label>
                                     <input
                                         type="number"
-                                        className={`form-control ${
-                                            errors.quantite ? "is-invalid" : ""
-                                        }`}
+                                        className={`form-control ${errors.quantite ? "is-invalid" : ""}`}
                                         name="quantite"
                                         value={formData.quantite}
                                         onChange={handleChange}
-                                        style={{
-                                            backgroundColor: "#fff",
-                                            borderRadius: "25px",
-                                            border: "1px solid #dee2e6",
-                                            padding: "10px",
-                                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
-                                            fontSize: "14px",
-                                        }}
                                     />
-                                    {errors.quantite && (
-                                        <div className="invalid-feedback">{errors.quantite[0]}</div>
-                                    )}
+                                    {errors.quantite && <div className="invalid-feedback">{errors.quantite[0]}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Référence</label>
                                     <input
                                         type="text"
-                                        className={`form-control ${
-                                            errors.reference ? "is-invalid" : ""
-                                        }`}
+                                        className={`form-control ${errors.reference ? "is-invalid" : ""}`}
                                         name="reference"
                                         value={formData.reference}
                                         onChange={handleChange}
-                                        style={{
-                                            backgroundColor: "#fff",
-                                            borderRadius: "25px",
-                                            border: "1px solid #dee2e6",
-                                            padding: "10px",
-                                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
-                                            fontSize: "14px",
-                                        }}
                                     />
-                                    {errors.reference && (
-                                        <div className="invalid-feedback">{errors.reference[0]}</div>
-                                    )}
+                                    {errors.reference && <div className="invalid-feedback">{errors.reference[0]}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Prix (€)</label>
@@ -423,18 +412,8 @@ function Produits() {
                                         name="prix"
                                         value={formData.prix}
                                         onChange={handleChange}
-                                        style={{
-                                            backgroundColor: "#fff",
-                                            borderRadius: "25px",
-                                            border: "1px solid #dee2e6",
-                                            padding: "10px",
-                                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
-                                            fontSize: "14px",
-                                        }}
                                     />
-                                    {errors.prix && (
-                                        <div className="invalid-feedback">{errors.prix[0]}</div>
-                                    )}
+                                    {errors.prix && <div className="invalid-feedback">{errors.prix[0]}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Image</label>
@@ -444,28 +423,12 @@ function Produits() {
                                         name="image"
                                         accept="image/*"
                                         onChange={handleChange}
-                                        style={{
-                                            backgroundColor: "#fff",
-                                            borderRadius: "25px",
-                                            border: "1px solid #dee2e6",
-                                            padding: "10px",
-                                            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
-                                            fontSize: "14px",
-                                        }}
                                     />
-                                    {errors.image && (
-                                        <div className="invalid-feedback">{errors.image[0]}</div>
-                                    )}
+                                    {errors.image && <div className="invalid-feedback">{errors.image[0]}</div>}
                                 </div>
                             </div>
                             <div className="modal-footer" style={{ borderTop: "none" }}>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-danger btn-sm"
-                                    data-bs-dismiss="modal"
-                                >
-                                    Fermer
-                                </button>
+                                <button type="button" className="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Fermer</button>
                                 <button type="submit" className="btn btn-outline-success btn-sm">
                                     {editingId ? "Mettre à jour" : "Enregistrer"}
                                 </button>

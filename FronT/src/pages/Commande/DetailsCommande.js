@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../services/api';
-import './DetailsCommande.css'; // Vous devrez créer ce fichier CSS
+import './DetailsCommande.css'; // Assure-toi que le fichier CSS existe
 
 const DetailsCommande = () => {
     const { id } = useParams();
@@ -18,14 +18,13 @@ const DetailsCommande = () => {
                 setCommande(res.data);
             } catch (error) {
                 console.error("Erreur lors du chargement de la commande :", error);
-                // Gérer les erreurs (par exemple, afficher un message ou rediriger)
             } finally {
                 setLoading(false);
             }
         };
 
         fetchCommande();
-    }, [id]); // Dépendance à l'ID pour recharger si l'ID change
+    }, [id]);
 
     if (loading) {
         return <p className="details-loading">⏳ Chargement des détails de la commande...</p>;
@@ -35,7 +34,7 @@ const DetailsCommande = () => {
         return <p className="details-not-found">📭 Commande non trouvée.</p>;
     }
 
-    // Calcul du total des produits (comme dans le composant Commande)
+    // Calcul du total des produits
     const totalCommande = commande.produits.reduce((total, prod) => {
         const prix = parseFloat(prod.pivot.prix_unitaire);
         const quantite = parseFloat(prod.pivot.quantite);
@@ -66,14 +65,18 @@ const DetailsCommande = () => {
 
                 <div className="details-section">
                     <h3>Produits Commandés</h3>
-                    <ul className="produits-list">
-                        {commande.produits.map(prod => (
-                            <li key={prod.id}>
-                                <span>{prod.designation}</span>
-                                <span>{prod.pivot.quantite} x {parseFloat(prod.pivot.prix_unitaire).toFixed(2)} €</span>
-                            </li>
-                        ))}
-                    </ul>
+                    {commande.produits.length > 0 ? (
+                        <ul className="produits-list">
+                            {commande.produits.map(prod => (
+                                <li key={prod.id}>
+                                    <span>{prod.designation}</span>
+                                    <span>{prod.pivot.quantite} x {parseFloat(prod.pivot.prix_unitaire).toFixed(2)} €</span>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>Aucun produit ajouté pour cette commande.</p>
+                    )}
                 </div>
 
                 <div className="details-total">

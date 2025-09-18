@@ -87,3 +87,40 @@ h2 {
 .commande-section th {
     background: #f8f8f8;
 }
+
+
+
+
+/* AjouterCommande.css */
+
+/*
+* Style de base pour les cartes de produits.
+* Assurez-vous d'avoir ce style ou un équivalent
+* pour les cartes.
+*/
+.card {
+    transition: border-color 0.3s ease-in-out;
+}
+
+/*
+* Option 1 : Bordure sur l'ensemble de la carte
+* (C'est la solution la plus simple et la plus visible)
+*/
+.produit-selectionne {
+    /*
+    * Cible la carte complète pour y appliquer la bordure.
+    * `important` est utilisé pour s'assurer que cette règle
+    * l'emporte sur d'autres styles de bordure.
+    */
+    border: 2px solid #007bff !important;
+}
+
+
+/*
+* Option 2 : Bordure uniquement sur le champ de quantité
+* (Si vous préférez un effet plus subtil)
+*/
+.produit-selectionne input[type="number"] {
+    border: 2px solid #28a745 !important; /* Couleur verte */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Ajoute une ombre pour un meilleur effet */
+}

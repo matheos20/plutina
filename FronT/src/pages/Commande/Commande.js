@@ -10,8 +10,9 @@ const Commande = () => {
     const [commandes, setCommandes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
+    const [user, setUser] = useState(null); // utilisateur connecté
 
-    // États pour le formulaire d’ajout (repris de AjouterCommande)
+    // États pour le formulaire d’ajout
     const [clients, setClients] = useState([]);
     const [produits, setProduits] = useState([]);
     const [selectedClient, setSelectedClient] = useState('');
@@ -21,13 +22,36 @@ const Commande = () => {
     const [errors, setErrors] = useState({});
 
     const navigate = useNavigate();
+    useEffect(() => {
+        if (user && user.role === 'client') {
+            setSelectedClient(user.id);
+        }
+    }, [user]);
 
     useEffect(() => {
-        axios.get('/commandes')
-            .then(res => setCommandes(res.data))
-            .catch(err => console.error("Erreur lors du chargement des commandes :", err))
-            .finally(() => setLoading(false));
+        // Récupérer l'utilisateur connecté
+        const fetchUser = async () => {
+            try {
+                const res = await axios.get('/user'); // endpoint pour l'utilisateur connecté
+                setUser(res.data);
+            } catch (err) {
+                console.error("Erreur chargement utilisateur :", err);
+            }
+        };
+        // Récupérer les commandes
+        const fetchCommandes = async () => {
+            try {
+                const res = await axios.get('/commandes');
+                setCommandes(res.data);
+            } catch (err) {
+                console.error("Erreur chargement commandes :", err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchUser();
+        fetchCommandes();
         fetchClients();
         fetchProduits();
     }, []);
@@ -41,7 +65,6 @@ const Commande = () => {
             console.error("Erreur chargement clients :", error);
         }
     };
-
 
     const fetchProduits = async () => {
         try {
@@ -82,9 +105,7 @@ const Commande = () => {
         });
     };
 
-    const calculTotalProduit = (quantite, prix_unitaire) => {
-        return Number(quantite || 0) * Number(prix_unitaire || 0);
-    };
+    const calculTotalProduit = (quantite, prix_unitaire) => Number(quantite || 0) * Number(prix_unitaire || 0);
 
     const calculTotalCommande = () => {
         return selectedProduits.reduce((total, p) => {
@@ -115,8 +136,7 @@ const Commande = () => {
 
         try {
             const res = await axios.post('/commandes', payload);
-            setCommandes(prev => [...prev, res.data.commande]); // <-- utiliser res.data.commande
-            // ajoute la nouvelle commande dans la liste
+            setCommandes(prev => [...prev, res.data.commande]);
             alert("Commande créée avec succès !");
             setShowModal(false);
 
@@ -203,6 +223,7 @@ const Commande = () => {
             </div>
 
             {/* Modal ajout commande */}
+            {/* Modal ajout commande */}
             {showModal && (
                 <div className="modal show d-block" tabIndex="-1">
                     <div className="modal-dialog modal-lg">
@@ -216,27 +237,48 @@ const Commande = () => {
                                     {/* Client */}
                                     <div className="mb-3">
                                         <label>Client</label>
-                                        <select className="form-control" value={selectedClient}
-                                                onChange={(e) => setSelectedClient(e.target.value)} required>
-                                            <option value="">-- Sélectionner --</option>
-                                            {clients.map(client => (
-                                                <option key={client.id} value={client.id}>
-                                                    {client.nom} {client.prenom}
-                                                </option>
-                                            ))}
+                                        <select
+                                            className="form-control"
+                                            value={selectedClient}
+                                            onChange={(e) => setSelectedClient(e.target.value)}
+                                            required
+                                            disabled={user?.role === 'client'} // désactive pour client
+                                        >
+                                            {user?.role === 'client' ? (
+                                                <option value={user.id}>{user.nom} {user.prenom}</option>
+                                            ) : (
+                                                <>
+                                                    <option value="">-- Sélectionner --</option>
+                                                    {clients.map(client => (
+                                                        <option key={client.id} value={client.id}>
+                                                            {client.nom} {client.prenom}
+                                                        </option>
+                                                    ))}
+                                                </>
+                                            )}
                                         </select>
                                     </div>
 
                                     {/* Dates */}
                                     <div className="mb-3">
                                         <label>Date début</label>
-                                        <input type="datetime-local" className="form-control"
-                                               value={debut_location} onChange={(e) => setDebutLocation(e.target.value)} required />
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={debut_location}
+                                            onChange={(e) => setDebutLocation(e.target.value)}
+                                            required
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label>Date fin</label>
-                                        <input type="datetime-local" className="form-control"
-                                               value={fin_location} onChange={(e) => setFinLocation(e.target.value)} required />
+                                        <input
+                                            type="datetime-local"
+                                            className="form-control"
+                                            value={fin_location}
+                                            onChange={(e) => setFinLocation(e.target.value)}
+                                            required
+                                        />
                                     </div>
 
                                     {/* Produits */}
@@ -249,11 +291,14 @@ const Commande = () => {
                                                     <div className="card p-2">
                                                         <h6>{produit.designation}</h6>
                                                         <p>Prix : {produit.prix} Ar</p>
-                                                        <input type="number" min="0"
-                                                               value={selection.quantite || ''}
-                                                               placeholder="Quantité"
-                                                               className="form-control"
-                                                               onChange={(e) => handleProduitChange(produit.id, e.target.value)} />
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={selection.quantite || ''}
+                                                            placeholder="Quantité"
+                                                            className="form-control"
+                                                            onChange={(e) => handleProduitChange(produit.id, e.target.value)}
+                                                        />
                                                         <p>Total : {selection.quantite ? calculTotalProduit(selection.quantite, produit.prix) : 0} Ar</p>
                                                     </div>
                                                 </div>
@@ -262,7 +307,6 @@ const Commande = () => {
                                     </div>
 
                                     <h5 className="text-end">💰 Total commande : {calculTotalCommande()} Ar</h5>
-
                                     <button type="submit" className="btn btn-success w-100">Valider</button>
                                 </form>
                             </div>
@@ -271,16 +315,19 @@ const Commande = () => {
                 </div>
             )}
 
-            {/* Liste commandes */}
+            {/* Liste commandes filtrée selon l'utilisateur */}
             <div className="commandes-grid">
-                {commandes.map(commande => (
+                {(commandes.filter(c => {
+                    // Si client, ne voir que ses commandes
+                    if (user?.role === 'client') return c.id_client === user.id;
+                    return true; // admin/receptionniste voient tout
+                })).map(commande => (
                     <div className="commande-card" key={commande.id}>
                         <div className="commande-header">
                             <h3>Commande #{commande.id}</h3>
                             <span className={`etat ${(commande.etat || 'en-cours').replace(' ', '-')}`}>
                               {commande.etat || 'En cours'}
                             </span>
-
                         </div>
                         <p><strong>Client :</strong> {commande.client?.nom} {commande.client?.prenom}</p>
                         <p><strong>Période :</strong> {commande.debut_location} → {commande.fin_location}</p>
